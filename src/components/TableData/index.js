@@ -15,9 +15,12 @@ import Paper from '@mui/material/Paper';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
-import { Button } from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ButtonBox from '../ButtonBox';
+import SearchIcon from '@mui/icons-material/Search';
+
+import { useDispatch, useSelector } from 'react-redux';
 
 function createData(name, calories, fat, carbs, protein) {
   return {
@@ -80,31 +83,25 @@ function stableSort(array, comparator) {
 
 const headCells = [
   {
-    id: 'name',
+    id: 'productName',
     numeric: false,
     disablePadding: true,
     label: 'Product Name',
   },
   {
-    id: 'calories',
+    id: 'qty',
     numeric: true,
     disablePadding: false,
     label: 'Qty',
   },
   {
-    id: 'fat',
+    id: 'price',
     numeric: true,
     disablePadding: false,
     label: 'Price',
   },
-//   {
-//     id: 'carbs',
-//     numeric: true,
-//     disablePadding: false,
-//     label: 'Carbs (g)',
-//   },
   {
-    id: 'protein',
+    id: 'action',
     numeric: true,
     disablePadding: false,
     label: 'Action',
@@ -165,7 +162,10 @@ function EnhancedTableToolbar(props) {
     }
   const { numSelected } = props;
 
+  
+
   return (
+
     <Toolbar
       sx={{
         pl: { sm: 2 },
@@ -176,23 +176,13 @@ function EnhancedTableToolbar(props) {
         }),
       }}
     >
-    
-        {/* <Button 
-        //   sx={{ flex: '1 1 100%' }}
-          
-          id="tableTitle"
-          component="div"
-          variant="contained"
-          onClick={handleonclick}
-        >
-          Add Product
-        </Button> */}
+ =
     <ButtonBox 
     onClick={handleonclick}>
         Add Product
     </ButtonBox>
-
-
+    <SearchIcon sx={{ marginLeft: '60%' }} />
+          <TextField type='search' placeholder='Search Product'   />
     </Toolbar>
   );
 }
@@ -207,7 +197,11 @@ export default function TableData() {
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+  const dispatch = useDispatch();
+  const tablerow =  useSelector((state)=>state?.table);
+  console.log("tablerow",tablerow)
+const rowData = tablerow?.rows
+console.log("rowdata",rowData)
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -216,7 +210,7 @@ export default function TableData() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.name);
+      const newSelected = rowData.map((n) => n.name);
       setSelected(newSelected);
       return;
     }
@@ -257,15 +251,15 @@ export default function TableData() {
 
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rowData.length) : 0;
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
+      stableSort(rowData, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage,
       ),
-    [order, orderBy, page, rowsPerPage],
+    [order, orderBy, page, rowData, rowsPerPage],
   );
 
   return (
@@ -284,21 +278,21 @@ export default function TableData() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={rowData.length}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
-                const isItemSelected = isSelected(row.name);
+              {visibleRows.map((rowData, index) => {
+                const isItemSelected = isSelected(rowData.name);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event) => handleClick(event, row.name)}
+                    onClick={(event) => handleClick(event, rowData.name)}
                    
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.name}
+                    key={rowData.name}
                     selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
@@ -309,10 +303,10 @@ export default function TableData() {
                       scope="row"
                       padding="none"
                     >
-                      {row.name}
+                      {rowData.productName}
                     </TableCell>
-                    <TableCell align="right">{row.calories}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
+                    <TableCell align="right">{rowData.qty}</TableCell>
+                    <TableCell align="right">{rowData.price}</TableCell>
                     {/* <TableCell align="right">{row.carbs}</TableCell> */}
                     <TableCell align="right"><EditIcon /><DeleteIcon /></TableCell>
                   </TableRow>
@@ -331,7 +325,7 @@ export default function TableData() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={rowData.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
