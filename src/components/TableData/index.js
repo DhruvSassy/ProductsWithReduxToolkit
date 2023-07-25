@@ -1,6 +1,4 @@
-import * as React from 'react';
-import PropTypes from 'prop-types';
-import { alpha } from '@mui/material/styles';
+import React, { useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,38 +13,12 @@ import Paper from '@mui/material/Paper';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
-import { Button, TextField } from '@mui/material';
+import { TextField } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ButtonBox from '../ButtonBox';
 import SearchIcon from '@mui/icons-material/Search';
-
 import { useDispatch, useSelector } from 'react-redux';
-
-function createData(name, calories, fat, carbs, protein) {
-  return {
-    name,
-    calories,
-    fat,
-    carbs,
-    protein,
-  };
-}
-
-const rows = [
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Donut', 452, 25.0, 51, 4.9),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-  createData('Honeycomb', 408, 3.2, 87, 6.5),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0),
-  createData('KitKat', 518, 26.0, 65, 7.0),
-  createData('Lollipop', 392, 0.2, 98, 0.0),
-  createData('Marshmallow', 318, 0, 81, 2.0),
-  createData('Nougat', 360, 19.0, 9, 37.0),
-  createData('Oreo', 437, 18.0, 63, 4.0),
-];
+import { deleteProduct } from '../../redux/action';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -64,12 +36,7 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
-   
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -109,8 +76,7 @@ const headCells = [
 ];
 
 function EnhancedTableHead(props) {
-  const {  order, orderBy,  onRequestSort } =
-    props;
+  const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -118,7 +84,6 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
@@ -145,80 +110,67 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
-  numSelected: PropTypes.number.isRequired,
-  onRequestSort: PropTypes.func.isRequired,
-  onSelectAllClick: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
-};
-
-function EnhancedTableToolbar(props) {
-    const navigate = useNavigate();
-
-    const handleonclick = () => {
-        navigate('/add-product')
-    }
-  const { numSelected } = props;
-
-  
-
-  return (
-
-    <Toolbar
-      sx={{
-        pl: { sm: 2 },
-        pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        }),
-      }}
-    >
- =
-    <ButtonBox 
-    onClick={handleonclick}>
-        Add Product
-    </ButtonBox>
-    <SearchIcon sx={{ marginLeft: '60%' }} />
-          <TextField type='search' placeholder='Search Product'   />
-    </Toolbar>
-  );
-}
-
-// EnhancedTableToolbar.propTypes = {
-//   numSelected: PropTypes.number.isRequired,
-// };
 
 export default function TableData() {
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [order, setOrder] = useState('asc');
+  const [orderBy, setOrderBy] = useState('calories');
+  const [selected, setSelected] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(2);
   const dispatch = useDispatch();
-  const tablerow =  useSelector((state)=>state?.table);
-  console.log("tablerow",tablerow)
-const rowData = tablerow?.rows
-console.log("rowdata",rowData)
+  const navigate = useNavigate();
+  const [searchProduct, setSearchProduct] = useState('');
+
+
+
+  const tablerow = useSelector((tableReducer) => tableReducer);
+  console.log("tablerow", tablerow);
+  const rowData = tablerow?.table?.rows;
+  console.log("rowdata", rowData);
+
   const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isAsc = orderBy === property && order === 'desc';
+    setOrder(isAsc ? 'asc' : 'desc');
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelected = rowData.map((n) => n.name);
-      setSelected(newSelected);
-      return;
+
+  const handleDelete = (id) => {
+    // deleted item no index sodhe 
+    const indexToDelete = rowData.findIndex((row) => row.id === id);
+    console.log("indexToDelete::",indexToDelete)
+
+    // aa page ma na rowData array mathi delete kare che
+    if (indexToDelete !== -1) {
+      const updatedRowData = [...rowData];
+      updatedRowData.splice(indexToDelete, 1);
+      console.log("updatedRowData::",updatedRowData)
+
+      dispatch(deleteProduct(id));
+
+
+      // product delete thya pachi page Calculate kare 
+      const updatedNumPages = Math.ceil(updatedRowData.length / rowsPerPage);
+      console.log("updatedNumPages:",updatedNumPages)
+
+      // product delete thya pachi last page check kare
+      if (updatedNumPages < page + 1) {
+        // last page hoi to ena agadi na page par mokle 
+        setPage((prevPage) => Math.max(prevPage - 1, 0));
+      }
     }
-    setSelected([]);
   };
+
+
+
+  const handleEdit = (id) => {
+    navigate(`/edit-product/${id}`)
+  }
+
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
+
     let newSelected = [];
 
     if (selectedIndex === -1) {
@@ -246,93 +198,102 @@ console.log("rowdata",rowData)
     setPage(0);
   };
 
+  const handleonclick = () => {
+    navigate('/add-product');
+  };
 
   const isSelected = (name) => selected.indexOf(name) !== -1;
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rowData.length) : 0;
 
-  const visibleRows = React.useMemo(
-    () =>
-      stableSort(rowData, getComparator(order, orderBy)).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage,
-      ),
-    [order, orderBy, page, rowData, rowsPerPage],
+
+  const handleSearchChange = (event) => {
+    setSearchProduct(event.target.value);
+    //Page ne 1st set kare 
+    setPage(0);
+  };
+
+  //aapde serach kari e "productName" wise te aakhi row aave
+  const filteredRows = rowData.filter((row) => row.productName.toLowerCase().includes(searchProduct.toLowerCase()));
+
+  const reversedRows = filteredRows.reverse();
+
+  const visibleRows = useMemo(() =>
+    stableSort(reversedRows, getComparator(order, orderBy)).slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage,
+    ),
+    [order, orderBy, page, reversedRows, rowsPerPage],
   );
+  console.log("visibleRows:", visibleRows)
 
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <EnhancedTableToolbar numSelected={selected.length} />
-        <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-           
-          >
+        <Toolbar
+          sx={{
+            pl: { sm: 2 },
+            pr: { xs: 1, sm: 1 },
+          }}
+        >
+          <ButtonBox onClick={handleonclick}>Add Product</ButtonBox>
+
+          <SearchIcon sx={{ marginLeft: '60%' }} />
+          <TextField type="search" placeholder="Search Product" value={searchProduct} onChange={handleSearchChange} />
+        </Toolbar>        <TableContainer>
+          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rowData.length}
+              rowCount={visibleRows.length}
             />
-            <TableBody>
-              {visibleRows.map((rowData, index) => {
-                const isItemSelected = isSelected(rowData.name);
-                const labelId = `enhanced-table-checkbox-${index}`;
+            {visibleRows.length === 0 ? <p>No Data Found</p> :
+              <TableBody>
+                {visibleRows.map((visibleRows, index) => {
+                  const isItemSelected = isSelected(visibleRows.name);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                return (
-                  <TableRow
-                    hover
-                    onClick={(event) => handleClick(event, rowData.name)}
-                   
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={rowData.name}
-                    selected={isItemSelected}
-                    sx={{ cursor: 'pointer' }}
-                  >
-                    
-                    <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
+                  return (
+
+                    <TableRow
+                      hover
+                      onClick={(event) => handleClick(event, visibleRows.name)}
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={visibleRows.name}
+                      selected={isItemSelected}
+                      sx={{ cursor: 'pointer' }}
                     >
-                      {rowData.productName}
-                    </TableCell>
-                    <TableCell align="right">{rowData.qty}</TableCell>
-                    <TableCell align="right">{rowData.price}</TableCell>
-                    {/* <TableCell align="right">{row.carbs}</TableCell> */}
-                    <TableCell align="right"><EditIcon /><DeleteIcon /></TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
+                      <TableCell component="th" id={labelId} scope="row" padding="none">
+                        {visibleRows.productName}
+                      </TableCell>
+                      <TableCell align="right">{visibleRows.qty}</TableCell>
+                      <TableCell align="right">{visibleRows.price}</TableCell>
+                      <TableCell align="right">
+                        <EditIcon onClick={() => handleEdit(visibleRows?.id)} />
+                        <DeleteIcon onClick={() => handleDelete(visibleRows?.id)} />
+                      </TableCell >
+                    </TableRow>
+                  );
+                })}
+
+              </TableBody>
+            }
           </Table>
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25]}
-          component="div"
-          count={rowData.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
+        {visibleRows.length === 0 ? '' :
+          <TablePagination
+            rowsPerPageOptions={[2, 10, 25]}
+            component="div"
+            count={rowData?.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        }
       </Paper>
-    
     </Box>
   );
 }

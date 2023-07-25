@@ -1,14 +1,10 @@
 
-import { ADD_DATA, SET_ORDER, SET_ORDER_BY, SET_PAGE, SET_ROWS_PER_PAGE, SET_TABLE_DATA } from "../action/constant";
+import { ADD_DATA, DELETE_DATA, EDIT_DATA, SET_TABLE_DATA } from "../action/constant";
 
 
 
 const initialState = {
   rows: [],
-  order: 'asc',
-  orderBy: '',
-  page: 0,
-  rowsPerPage: 10,
 };
 
 const tableReducer = (state = initialState, action) => {
@@ -23,26 +19,26 @@ const tableReducer = (state = initialState, action) => {
         ...state,
         rows: action.payload,
       };
-    case SET_ORDER:
+    case EDIT_DATA:
+    const index = state.rows.findIndex((product) => product.id === action.payload.id);
+    if (index !== -1) {
+      //navo array banve with edited product
+      const updatedRows = [...state.rows];
+      updatedRows[index] = action.payload;
       return {
         ...state,
-        order: action.payload,
+        rows: updatedRows,
       };
-    case SET_ORDER_BY:
-      return {
-        ...state,
-        orderBy: action.payload,
-      };
-    case SET_PAGE:
-      return {
-        ...state,
-        page: action.payload,
-      };
-    case SET_ROWS_PER_PAGE:
-      return {
-        ...state,
-        rowsPerPage: action.payload,
-      };
+    }
+    // product nahi mde tyare current value aape
+    return state;
+    case DELETE_DATA:
+    return {
+      ...state,
+      //rows nam na array mathi product ni id sodhe ane array mathi kadhe 
+      rows: state.rows.filter((product) => product.id !== action.payload),
+    };
+  
     default:
       return state;
   }

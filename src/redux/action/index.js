@@ -1,4 +1,4 @@
-import { ADD_DATA, SET_ORDER, SET_ORDER_BY, SET_PAGE, SET_ROWS_PER_PAGE, SET_TABLE_DATA } from "./constant";
+import { ADD_DATA, DELETE_DATA, EDIT_DATA, SET_TABLE_DATA } from "./constant";
 
 export const addproduct = (product) => ({
     type:ADD_DATA,
@@ -10,22 +10,13 @@ export const setTableData = (data) => ({
   payload: data,
 });
 
-export const setOrder = (order) => ({
-  type: SET_ORDER,
-  payload: order,
+export const editProduct = (product) => ({
+  type:EDIT_DATA,
+  payload:product,
 });
 
-export const setOrderBy = (orderBy) => ({
-  type: SET_ORDER_BY,
-  payload: orderBy,
+export const deleteProduct = (id) => ({
+  type: DELETE_DATA,
+  payload:id
 });
 
-export const setPage = (page) => ({
-  type: SET_PAGE,
-  payload: page,
-});
-
-export const setRowsPerPage = (rowsPerPage) => ({
-  type: SET_ROWS_PER_PAGE,
-  payload: rowsPerPage,
-});
