@@ -3,15 +3,15 @@ import { Button } from '@mui/material';
 
 
 const ButtonBox = (props) => {
-    const {onClick} = props;
+    const {onClick,title,sx} = props;
     return (
         <div>
             <Button
                 variant="contained"
                 onClick={onClick}
-              
+                sx={sx}
             >
-                 Add Product
+                 {title}
             </Button>
         </div>
     )

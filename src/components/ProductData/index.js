@@ -1,24 +1,9 @@
-import React, { useMemo, useState } from 'react';
-import Box from '@mui/material/Box';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
-import TableRow from '@mui/material/TableRow';
-import TableSortLabel from '@mui/material/TableSortLabel';
-import Toolbar from '@mui/material/Toolbar';
-import Paper from '@mui/material/Paper';
+import React, { useMemo } from 'react';
+
+import {Box,Table,TableBody,TableCell,TableContainer,TableHead,TablePagination,TableRow,TableSortLabel,Paper} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
-import { TextField } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import ButtonBox from '../ButtonBox';
-import SearchIcon from '@mui/icons-material/Search';
-import { useDispatch, useSelector } from 'react-redux';
-import { deleteProduct } from '../../redux/action';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -75,7 +60,7 @@ const headCells = [
   },
 ];
 
-function EnhancedTableHead(props) {
+function ProductTableHead(props) {
   const { order, orderBy, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
@@ -108,65 +93,31 @@ function EnhancedTableHead(props) {
       </TableRow>
     </TableHead>
   );
-}
+};
 
-
-export default function TableData() {
-  const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('calories');
-  const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(2);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const [searchProduct, setSearchProduct] = useState('');
-
-
-
-  const tablerow = useSelector((tableReducer) => tableReducer);
-  console.log("tablerow", tablerow);
-  const rowData = tablerow?.table?.rows;
-  console.log("rowdata", rowData);
+export default function ProductData(props) {
+  const {
+    order,
+    setOrder,
+    orderBy,
+    setOrderBy,
+    selected,
+    setSelected,
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
+    handleEdit,
+    handleDelete,
+    searchProduct,
+    productData, 
+  } = props;
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'desc';
     setOrder(isAsc ? 'asc' : 'desc');
     setOrderBy(property);
   };
-
-
-  const handleDelete = (id) => {
-    // deleted item no index sodhe 
-    const indexToDelete = rowData.findIndex((row) => row.id === id);
-    console.log("indexToDelete::",indexToDelete)
-
-    // aa page ma na rowData array mathi delete kare che
-    if (indexToDelete !== -1) {
-      const updatedRowData = [...rowData];
-      updatedRowData.splice(indexToDelete, 1);
-      console.log("updatedRowData::",updatedRowData)
-
-      dispatch(deleteProduct(id));
-
-
-      // product delete thya pachi page Calculate kare 
-      const updatedNumPages = Math.ceil(updatedRowData.length / rowsPerPage);
-      console.log("updatedNumPages:",updatedNumPages)
-
-      // product delete thya pachi last page check kare
-      if (updatedNumPages < page + 1) {
-        // last page hoi to ena agadi na page par mokle 
-        setPage((prevPage) => Math.max(prevPage - 1, 0));
-      }
-    }
-  };
-
-
-
-  const handleEdit = (id) => {
-    navigate(`/edit-product/${id}`)
-  }
-
 
   const handleClick = (event, name) => {
     const selectedIndex = selected.indexOf(name);
@@ -185,7 +136,6 @@ export default function TableData() {
         selected.slice(selectedIndex + 1),
       );
     }
-
     setSelected(newSelected);
   };
 
@@ -198,22 +148,8 @@ export default function TableData() {
     setPage(0);
   };
 
-  const handleonclick = () => {
-    navigate('/add-product');
-  };
-
-  const isSelected = (name) => selected.indexOf(name) !== -1;
-
-
-
-  const handleSearchChange = (event) => {
-    setSearchProduct(event.target.value);
-    //Page ne 1st set kare 
-    setPage(0);
-  };
-
-  //aapde serach kari e "productName" wise te aakhi row aave
-  const filteredRows = rowData.filter((row) => row.productName.toLowerCase().includes(searchProduct.toLowerCase()));
+  //aapde serach kari e "productName" wise te aakhi row aave and productData array mathi data aave 
+  const filteredRows = productData.filter((row) => row.productName.toLowerCase().includes(searchProduct.toLowerCase()));
 
   const reversedRows = filteredRows.reverse();
 
@@ -228,20 +164,10 @@ export default function TableData() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
-        <Toolbar
-          sx={{
-            pl: { sm: 2 },
-            pr: { xs: 1, sm: 1 },
-          }}
-        >
-          <ButtonBox onClick={handleonclick}>Add Product</ButtonBox>
-
-          <SearchIcon sx={{ marginLeft: '60%' }} />
-          <TextField type="search" placeholder="Search Product" value={searchProduct} onChange={handleSearchChange} />
-        </Toolbar>        <TableContainer>
+      <Paper sx={{ width: '100%', mb: 2 }}>  
+            <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-            <EnhancedTableHead
+            <ProductTableHead
               numSelected={selected.length}
               order={order}
               orderBy={orderBy}
@@ -251,18 +177,13 @@ export default function TableData() {
             {visibleRows.length === 0 ? <p>No Data Found</p> :
               <TableBody>
                 {visibleRows.map((visibleRows, index) => {
-                  const isItemSelected = isSelected(visibleRows.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
-
                   return (
-
                     <TableRow
                       hover
                       onClick={(event) => handleClick(event, visibleRows.name)}
-                      aria-checked={isItemSelected}
                       tabIndex={-1}
                       key={visibleRows.name}
-                      selected={isItemSelected}
                       sx={{ cursor: 'pointer' }}
                     >
                       <TableCell component="th" id={labelId} scope="row" padding="none">
@@ -282,16 +203,16 @@ export default function TableData() {
             }
           </Table>
         </TableContainer>
-        {visibleRows.length === 0 ? '' :
+        {visibleRows.length !== 0 ? 
           <TablePagination
             rowsPerPageOptions={[2, 10, 25]}
             component="div"
-            count={rowData?.length}
+            count={productData?.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+          /> : '' 
         }
       </Paper>
     </Box>

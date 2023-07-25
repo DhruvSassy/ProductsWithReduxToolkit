@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import InputBox from '../../../components/InputBox'
-import { Box, Button } from '@mui/material';
-import ButtonBox from '../../../components/ButtonBox';
+import React, { useEffect, useState } from 'react';
+
+import { Box } from '@mui/material';
+
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addproduct, editProduct } from '../../../redux/action';
+
+import InputBox from '../../../components/InputBox';
+import ButtonBox from '../../../components/ButtonBox';
 
 const AddProduct = () => {
   const { id } = useParams();
@@ -14,11 +17,13 @@ const AddProduct = () => {
   const [qty, setQty] = useState('');
   const [price, setPrice] = useState('');
   const [errorText, setErrorText] = useState({});
-  
-  const products = useSelector((tableReducer) => tableReducer?.table?.rows); 
-//aapde je product edit karvani hoi e product na data aave 
+
+  const products = useSelector(
+    (productReducer) => productReducer?.product?.list
+  );
+  //aapde je product edit karvani hoi e product na data aave
   const productToEdit = products?.find((product) => product?.id === id);
-  console.log("productToEdit",productToEdit) 
+  console.log('productToEdit', productToEdit);
 
   //edit par click karie tyare input box ma data aave
   useEffect(() => {
@@ -30,35 +35,33 @@ const AddProduct = () => {
   }, [productToEdit]);
 
   const handleCancel = () => {
-    navigate('/')
+    navigate('/');
   };
 
   const validate = () => {
     let isError = false;
     const errors = {};
     if (!productName) {
-      errors.productName = "Please Enter Product Name";
-      isError = true;
-    } 
-
-    if (!price) {
-      errors.price = "Please Enter Product Price";
+      errors.productName = 'Please Enter Product Name';
       isError = true;
     }
-     
-    if (!qty) {
-      errors.qty = "Please Enter Product Quantity";
+
+    if (!price) {
+      errors.price = 'Please Enter Product Price';
       isError = true;
-    } 
-    
+    }
+
+    if (!qty) {
+      errors.qty = 'Please Enter Product Quantity';
+      isError = true;
+    }
+
     setErrorText(errors);
     return {
       errors,
       isError,
     };
-
-
-  }
+  };
   const handleAddProduct = () => {
     const validationResult = validate();
 
@@ -69,10 +72,10 @@ const AddProduct = () => {
         qty,
         price,
       };
-      dispatch(addproduct(newProduct))
+      dispatch(addproduct(newProduct));
       navigate('/');
     }
-  }
+  };
 
   const handleEditProduct = () => {
     const validationResult = validate();
@@ -84,21 +87,27 @@ const AddProduct = () => {
         qty,
         price,
       };
-      dispatch(editProduct(newProduct))
-      
+      dispatch(editProduct(newProduct));
+
       navigate('/');
     }
-  }
+  };
 
   return (
-
-    <Box sx={{ display: 'flex', flexDirection: 'column', maxWidth: 400, margin: '0 auto' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: 400,
+        margin: '0 auto',
+      }}
+    >
       <InputBox
         name="name"
         label="Product Name"
         value={productName}
         onChange={(e) => setProductName(e.target.value)}
-        error={!!errorText.productName}
+        error={errorText.productName}
         helperText={errorText.productName}
       />
       <InputBox
@@ -106,7 +115,7 @@ const AddProduct = () => {
         label="Product Quantity"
         value={qty}
         onChange={(e) => setQty(e.target.value)}
-        error={!!errorText.qty}
+        error={errorText.qty}
         helperText={errorText.qty}
       />
       <InputBox
@@ -114,20 +123,31 @@ const AddProduct = () => {
         label="Product Price"
         value={price}
         onChange={(e) => setPrice(e.target.value)}
-        error={!!errorText?.price}
+        error={errorText?.price}
         helperText={errorText?.price}
       />
       <div sx={{ maxWidth: 400, margin: '0 auto' }}>
-        {id ? <Button variant="contained" sx={{ marginTop: '1.5%', marginRight: '1%' }} onClick={handleEditProduct} >Update Product </Button> :
-          <ButtonBox onClick={handleAddProduct} />
-        }
-
-        <Button onClick={handleCancel} variant="contained" sx={{ marginTop: '1.5%' }}>
-          Cancel
-        </Button>
+        {id ? (
+          <ButtonBox
+            sx={{ marginTop: '1.5%' }}
+            onClick={handleEditProduct}
+            title="Update Product"
+          />
+        ) : (
+          <ButtonBox
+            onClick={handleAddProduct}
+            title="Add Product"
+            sx={{ marginTop: '1.5%' }}
+          />
+        )}
+        <ButtonBox
+          onClick={handleCancel}
+          title="Cancel"
+          sx={{ marginTop: '1.5%' }}
+        ></ButtonBox>
       </div>
     </Box>
-  )
-}
+  );
+};
 
-export default AddProduct
+export default AddProduct;
