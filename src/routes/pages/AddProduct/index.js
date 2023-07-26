@@ -4,7 +4,7 @@ import { Box } from '@mui/material';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { addproduct, editProduct } from '../../../redux/action';
+import { addProduct, editProduct } from '../../../redux/action';
 
 import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
@@ -55,7 +55,12 @@ const AddProduct = () => {
       errors.qty = 'Please Enter Product Quantity';
       isError = true;
     }
-
+    const existingProduct = products.find((product) => product.productName.toLowerCase() === productName.toLowerCase());
+  
+    if (existingProduct && existingProduct.id !== id) {
+      errors.productName = 'Product with this name already exists';
+      isError = true;
+    }
     setErrorText(errors);
     return {
       errors,
@@ -72,7 +77,7 @@ const AddProduct = () => {
         qty,
         price,
       };
-      dispatch(addproduct(newProduct));
+      dispatch(addProduct(newProduct));
       navigate('/');
     }
   };
@@ -88,7 +93,6 @@ const AddProduct = () => {
         price,
       };
       dispatch(editProduct(newProduct));
-
       navigate('/');
     }
   };

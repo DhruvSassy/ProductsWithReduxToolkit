@@ -1,6 +1,6 @@
 import { ADD_DATA, DELETE_DATA, EDIT_DATA, SET_TABLE_DATA } from "./constant";
 
-export const addproduct = (product) => ({
+export const addProduct = (product) => ({
     type:ADD_DATA,
     payload:product,
 }) ;

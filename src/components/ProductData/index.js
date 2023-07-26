@@ -4,33 +4,11 @@ import {Box,Table,TableBody,TableCell,TableContainer,TableHead,TablePagination,T
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
 import EditIcon from '@mui/icons-material/Edit';
+import _ from 'loadsh'
 
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
+function sortVisibleRows(list, order, orderBy) {
+  console.log("OrderBy::",_.orderBy(list, [orderBy], [order]))
+  return _.orderBy(list, [orderBy], [order])
 }
 
 const headCells = [
@@ -151,15 +129,12 @@ export default function ProductData(props) {
   //aapde serach kari e "productName" wise te aakhi row aave and productData array mathi data aave 
   const filteredRows = productData.filter((row) => row.productName.toLowerCase().includes(searchProduct.toLowerCase()));
 
-  const reversedRows = filteredRows.reverse();
+  const reversedRows = _.reverse(filteredRows);
 
-  const visibleRows = useMemo(() =>
-    stableSort(reversedRows, getComparator(order, orderBy)).slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage,
-    ),
-    [order, orderBy, page, reversedRows, rowsPerPage],
-  );
+
+  const visibleRows = useMemo(() => {
+    return sortVisibleRows(reversedRows, order, orderBy).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  }, [ order, orderBy, page, rowsPerPage,reversedRows]);
   console.log("visibleRows:", visibleRows)
 
   return (
