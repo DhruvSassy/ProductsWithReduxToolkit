@@ -34,9 +34,7 @@ const productReducer = (state = initialState, action) => {
         ...state,
         list: updatedProductList,
       };
-
-    // product nahi mde tyare current value aape
-    // return state;
+      
     case DELETE_DATA:
       return {
         ...state,
