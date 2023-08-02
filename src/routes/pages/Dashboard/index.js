@@ -1,53 +1,91 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import ProductData from '../../../components/ProductData';
 import { deleteProduct } from '../../../redux/action';
-import InputBox from '../../../components/InputBox';
-import SearchIcon from '@mui/icons-material/Search';
-import ButtonBox from '../../../components/ButtonBox';
+
 import { Toolbar } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+
+
+import { reverse } from 'lodash';
+
+import CustomTable from '../../../components/CustomTable';
+import InputBox from '../../../components/InputBox';
+import ButtonBox from '../../../components/ButtonBox';
 
 const Dashboard = () => {
+  const headCells = [
+    {
+      id: 'productName',
+      numeric: false,
+      disablePadding: true,
+      label: 'Product Name',
+      sort: true,
+    },
+    {
+      id: 'qty',
+      numeric: true,
+      disablePadding: false,
+      label: 'Qty',
+    },
+    {
+      id: 'price',
+      numeric: true,
+      disablePadding: false,
+      label: 'Price',
+    },
+    {
+      id: 'action',
+      numeric: true,
+      disablePadding: false,
+      label: 'Action',
+      render: (row) => (
+        <>
+          <EditIcon onClick={() => handleEdit(row.id)} />
+          <DeleteIcon onClick={() => handleDelete(row.id)} />
+        </>
+      ),
+    },
+  ];
+
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('');
-  const [selected, setSelected] = useState([]);
-  const [page, setPage] = useState(0);
+  const [orderByField, setOrderByField] = useState('');
+  const [page, setPage] = useState(
+    Math.max(0, localStorage.getItem('page') ?? 0)
+  );
   const [rowsPerPage, setRowsPerPage] = useState(2);
+  const [searchProduct, setSearchProduct] = useState('');
+  const showPagination = true;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [searchProduct, setSearchProduct] = useState('');
 
-  const productRow = useSelector((productReducer) => productReducer);
-  const productData = productRow?.product?.list;
+  const productRow = useSelector(
+    (productReducer) => productReducer?.product?.list
+  );
 
   const handleDelete = (id) => {
-    // deleted item no index sodhe
-    const indexToDelete = productData.findIndex((row) => row.id === id);
-    console.log('indexToDelete::', indexToDelete);
-
-    // aa page ma na productData array mathi delete kare che
-    if (indexToDelete !== -1) {
-      const updatedRowData = [...productData];
-      updatedRowData.splice(indexToDelete, 1);
-      console.log('updatedRowData::', updatedRowData);
-
-      dispatch(deleteProduct(id));
-
-      // product delete thya pachi page Calculate kare
-      const updatedNumPages = Math.ceil(updatedRowData.length / rowsPerPage);
-      console.log('updatedNumPages:', updatedNumPages);
-
-      // product delete thya pachi last page check kare
-      if (updatedNumPages < page + 1) {
-        // last page hoi to ena agadi na page par mokle
-        setPage((prevPage) => Math.max(prevPage - 1, 0));
-      }
+    dispatch(deleteProduct(id));
+    if (visibleRows?.length === 1 && page > 0) {
+      setPage(page - 1);
     }
+  };
+
+  useEffect(() => {
+    localStorage.setItem('page', page);
+  }, [page]);
+
+  const handleRequestSort = (property) => {
+    const isAsc = orderByField === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderByField(property);
   };
 
   const handleEdit = (id) => {
     navigate(`/edit-product/${id}`);
+
+    // setPage(page)
   };
 
   const handleOnclick = () => {
@@ -56,9 +94,36 @@ const Dashboard = () => {
 
   const handleSearchChange = (event) => {
     setSearchProduct(event.target.value);
-    // Page ne 1st set kare
     setPage(0);
   };
+
+  //aapde serach kari e "productName" wise te serach kare and aakhi row aave and productData array mathi data aave
+  const filteredRows = productRow.filter((row) =>
+    row.productName.toLowerCase().includes(searchProduct.toLowerCase())
+  );
+  console.log('filteredRows', filteredRows);
+
+  const reversedRows = reverse(filteredRows);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const visibleRows = reversedRows.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  // useEffect(() => {
+  //   if (visibleRows?.length === 0 && page > 0) {
+  //     setPage(page - 1);
+  //   }
+  // }, [visibleRows, page]);
 
   return (
     <div style={{ margin: '1%' }}>
@@ -72,7 +137,7 @@ const Dashboard = () => {
           onClick={handleOnclick}
           title="Add Product"
           sx={{ marginTop: '1.5%' }}
-        />{' '}
+        />
         <SearchIcon sx={{ marginLeft: '60%' }} />
         <InputBox
           type="search"
@@ -81,22 +146,22 @@ const Dashboard = () => {
           onChange={handleSearchChange}
         />
       </Toolbar>
-      <ProductData
-        order={order}
-        setOrder={setOrder}
-        orderBy={orderBy}
-        setOrderBy={setOrderBy}
-        selected={selected}
-        setSelected={setSelected}
+
+      <CustomTable
+        headCells={headCells}
+        row={visibleRows}
+        order={order}         
+        orderByField={orderByField}
+        onRequestSort={handleRequestSort}
         page={page}
         setPage={setPage}
+        count={filteredRows.length}
+        handleChangePage={handleChangePage}
+        rowsPerPageOptions={[2, 10, 20]}
+        handleChangeRowsPerPage={handleChangeRowsPerPage}
         rowsPerPage={rowsPerPage}
         setRowsPerPage={setRowsPerPage}
-        handleEdit={handleEdit}
-        handleDelete={handleDelete}
-        searchProduct={searchProduct}
-        handleSearchChange={handleSearchChange}
-        productData={productData}
+        showPagination={showPagination}
       />
     </div>
   );

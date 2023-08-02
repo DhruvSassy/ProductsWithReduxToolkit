@@ -16,14 +16,15 @@ const productReducer = (state = initialState, action) => {
         ...state,
         list: [...state.list, action.payload],
       };
+
     case SET_TABLE_DATA:
       return {
         ...state,
         list: action.payload,
       };
+
     case EDIT_DATA:
       const updatedProduct = action.payload;
-      console.log("updatedProduct::",updatedProduct)
       const updatedProductList = state.list.map((product) => {
         if (product.id === updatedProduct.id) {
           return updatedProduct;
@@ -34,7 +35,7 @@ const productReducer = (state = initialState, action) => {
         ...state,
         list: updatedProductList,
       };
-      
+
     case DELETE_DATA:
       return {
         ...state,

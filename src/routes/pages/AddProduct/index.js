@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Box } from '@mui/material';
 
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../../../redux/action';
 
@@ -13,6 +13,7 @@ const AddProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
   const [productName, setProductName] = useState('');
   const [qty, setQty] = useState('');
   const [price, setPrice] = useState('');
@@ -55,8 +56,11 @@ const AddProduct = () => {
       errors.qty = 'Please Enter Product Quantity';
       isError = true;
     }
-    const existingProduct = products.find((product) => product.productName.toLowerCase() === productName.toLowerCase());
-  
+    const existingProduct = products.find(
+      (product) =>
+        product.productName.toLowerCase() === productName.toLowerCase()
+    );
+
     if (existingProduct && existingProduct.id !== id) {
       errors.productName = 'Product with this name already exists';
       isError = true;
