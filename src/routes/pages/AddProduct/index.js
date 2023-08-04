@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import { Box } from '@mui/material';
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../../../redux/action';
 
@@ -13,7 +13,6 @@ const AddProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation();
   const [productName, setProductName] = useState('');
   const [qty, setQty] = useState('');
   const [price, setPrice] = useState('');
@@ -22,6 +21,7 @@ const AddProduct = () => {
   const products = useSelector(
     (productReducer) => productReducer?.product?.list
   );
+
   //aapde je product edit karvani hoi e product na data aave
   const productToEdit = products?.find((product) => product?.id === id);
   console.log('productToEdit', productToEdit);
@@ -39,38 +39,49 @@ const AddProduct = () => {
     navigate('/');
   };
 
+  const existingProduct = products.find(
+    (product) =>
+      product.productName.toLowerCase() === productName.toLowerCase()
+  );
+
   const validate = () => {
     let isError = false;
     const errors = {};
-    if (!productName) {
+  
+    if (!productName.trim()) {
       errors.productName = 'Please Enter Product Name';
       isError = true;
-    }
-
-    if (!price) {
-      errors.price = 'Please Enter Product Price';
-      isError = true;
-    }
-
-    if (!qty) {
-      errors.qty = 'Please Enter Product Quantity';
-      isError = true;
-    }
-    const existingProduct = products.find(
-      (product) =>
-        product.productName.toLowerCase() === productName.toLowerCase()
-    );
-
-    if (existingProduct && existingProduct.id !== id) {
+    } else if (existingProduct && existingProduct.id !== id) {
       errors.productName = 'Product with this name already exists';
       isError = true;
+    } else if (/^\s+$/.test(productName)) {
+      errors.productName = 'Product Name cannot be just spaces';
+      isError = true;
     }
+  
+    if (!qty.trim()) {
+      errors.qty = 'Please Enter Product Quantity';
+      isError = true;
+    } else if (!/^\d+$/.test(qty)) {
+      errors.qty = 'Please Enter a valid numeric Quantity';
+      isError = true;
+    }
+  
+    if (!price.trim()) {
+      errors.price = 'Please Enter Product Price';
+      isError = true;
+    } else if (!/^\d+(\.\d{1,2})?$/.test(price)) { 
+      errors.price = 'Please Enter a valid numeric price';
+      isError = true;
+    }
+  
     setErrorText(errors);
     return {
       errors,
       isError,
     };
   };
+  
   const handleAddProduct = () => {
     const validationResult = validate();
 

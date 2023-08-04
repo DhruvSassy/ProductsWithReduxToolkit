@@ -3,9 +3,7 @@ import RoutesPath from './routes';
 
 function App() {
   return (
-<>
-<RoutesPath />
-</>
+      <RoutesPath />
   );
 }
 

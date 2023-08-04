@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { deleteProduct } from '../../../redux/action';
 
 import { Toolbar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 
-
 import { reverse } from 'lodash';
 
 import CustomTable from '../../../components/CustomTable';
 import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
+import CommonPagination from '../../../components/CommonPagination';
+import { deleteProduct } from '../../../redux/action';
 
 const Dashboard = () => {
   const headCells = [
@@ -50,12 +50,6 @@ const Dashboard = () => {
     },
   ];
 
-  const [order, setOrder] = useState('asc');
-  const [orderByField, setOrderByField] = useState('');
-  const [page, setPage] = useState(
-    Math.max(0, localStorage.getItem('page') ?? 0)
-  );
-  const [rowsPerPage, setRowsPerPage] = useState(2);
   const [searchProduct, setSearchProduct] = useState('');
   const showPagination = true;
   const dispatch = useDispatch();
@@ -65,6 +59,18 @@ const Dashboard = () => {
     (productReducer) => productReducer?.product?.list
   );
 
+  const {
+    page,
+    setPage,
+    rowsPerPage,
+    setRowsPerPage,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    order,
+    orderByField,
+    handleRequestSort,
+  } = CommonPagination();
+
   const handleDelete = (id) => {
     dispatch(deleteProduct(id));
     if (visibleRows?.length === 1 && page > 0) {
@@ -72,23 +78,14 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    localStorage.setItem('page', page);
-  }, [page]);
-
-  const handleRequestSort = (property) => {
-    const isAsc = orderByField === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderByField(property);
-  };
-
   const handleEdit = (id) => {
     navigate(`/edit-product/${id}`);
-
-    // setPage(page)
+    localStorage.setItem('page', page);
   };
 
   const handleOnclick = () => {
+    localStorage.setItem('page', '0');
+    setPage(0);
     navigate('/add-product');
   };
 
@@ -105,25 +102,10 @@ const Dashboard = () => {
 
   const reversedRows = reverse(filteredRows);
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
   const visibleRows = reversedRows.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-
-  // useEffect(() => {
-  //   if (visibleRows?.length === 0 && page > 0) {
-  //     setPage(page - 1);
-  //   }
-  // }, [visibleRows, page]);
 
   return (
     <div style={{ margin: '1%' }}>
@@ -150,7 +132,7 @@ const Dashboard = () => {
       <CustomTable
         headCells={headCells}
         row={visibleRows}
-        order={order}         
+        order={order}
         orderByField={orderByField}
         onRequestSort={handleRequestSort}
         page={page}
