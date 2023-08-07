@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { Toolbar } from '@mui/material';
+import { Alert, Button, IconButton, Snackbar, Toolbar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Badge from '@mui/material/Badge';
+import { styled } from '@mui/material/styles';
 
 import { reverse } from 'lodash';
 
@@ -13,10 +16,20 @@ import CustomTable from '../../../components/CustomTable';
 import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
 import CommonPagination from '../../../components/CommonPagination';
-import { deleteProduct } from '../../../redux/action';
+import { addToCart, deleteProduct } from '../../../redux/action';
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    right: -3,
+    top: 13,
+    border: `2px solid ${theme.palette.background.paper}`,
+    padding: '0 4px',
+  },
+}));
 
 const Dashboard = () => {
   const headCells = [
+  
     {
       id: 'productName',
       numeric: false,
@@ -45,15 +58,21 @@ const Dashboard = () => {
         <>
           <EditIcon onClick={() => handleEdit(row.id)} />
           <DeleteIcon onClick={() => handleDelete(row.id)} />
+          <Button style={{backgroundColor:'black',color:'white'}} onClick={()=>handleAddToCart(row.id)}>Add to Cart</Button>
         </>
       ),
     },
+   
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
+  const [open, setOpen] = useState(false);
   const showPagination = true;
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+const cart = useSelector((productReducer)=>productReducer?.product?.cart)
+console.log("cart:",cart);
 
   const productRow = useSelector(
     (productReducer) => productReducer?.product?.list
@@ -83,6 +102,25 @@ const Dashboard = () => {
     localStorage.setItem('page', page);
   };
 
+  const handleAddToCart = (id) => {
+    const isExist = cart.some((rec) => rec.id === id);
+
+    if (isExist) {
+      setOpen(true);
+    } else {
+      const productToAdd = productRow.find((product) => product.id === id);
+      dispatch(addToCart([...cart, productToAdd]));
+    }
+  };
+  
+  const handleClose = ( reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+  
+
   const handleOnclick = () => {
     localStorage.setItem('page', '0');
     setPage(0);
@@ -92,6 +130,10 @@ const Dashboard = () => {
   const handleSearchChange = (event) => {
     setSearchProduct(event.target.value);
     setPage(0);
+  };
+
+  const handleOnCart = () => {
+      navigate('/cartPage');
   };
 
   //aapde serach kari e "productName" wise te serach kare and aakhi row aave and productData array mathi data aave
@@ -127,8 +169,17 @@ const Dashboard = () => {
           value={searchProduct}
           onChange={handleSearchChange}
         />
+    <IconButton aria-label="cart" sx={{marginLeft:'6%'}}>
+      <StyledBadge badgeContent={cart?.length} color="secondary">
+        <ShoppingCartIcon  onClick={handleOnCart}/>
+      </StyledBadge>
+    </IconButton>
       </Toolbar>
-
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}  style={{marginTop:1000}}>
+        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+          This product already add in cart!
+        </Alert>
+      </Snackbar>
       <CustomTable
         headCells={headCells}
         row={visibleRows}

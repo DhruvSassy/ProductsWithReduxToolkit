@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -12,6 +13,9 @@ import {
   TableSortLabel,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
+import IconButton from '@mui/material/IconButton';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import _ from 'loadsh';
 
@@ -40,6 +44,8 @@ const CustomTable = (props) => {
   };
 
   const sortedRow = sortVisibleRows(row, order, orderByField);
+
+  const [open, setOpen] = useState(false);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -101,7 +107,7 @@ const CustomTable = (props) => {
             </TableBody>
           </Table>
         </TableContainer>
-        { showPagination && sortedRow.length ?   (
+        {showPagination && sortedRow.length ? (
           <TablePagination
             rowsPerPageOptions={rowsPerPageOptions}
             component="div"
@@ -111,7 +117,7 @@ const CustomTable = (props) => {
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
           />
-        ) : (null)}
+        ) : null}
       </Paper>
     </Box>
   );

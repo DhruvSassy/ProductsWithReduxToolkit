@@ -51,11 +51,11 @@ const AddProduct = () => {
     if (!productName.trim()) {
       errors.productName = 'Please Enter Product Name';
       isError = true;
-    } else if (existingProduct && existingProduct.id !== id) {
+    } else if (existingProduct) {
       errors.productName = 'Product with this name already exists';
       isError = true;
-    } else if (/^\s+$/.test(productName)) {
-      errors.productName = 'Product Name cannot be just spaces';
+    } else if (productName.includes(' ')) {
+      errors.productName = 'Product name cannot contain spaces';
       isError = true;
     }
   
