@@ -53,7 +53,7 @@ const productReducer = (state = initialState, action) => {
       case DELETE_TO_CART:
       return {
         ...state,
-        cart: state.cart.filter((product) => product.id !== action.payload),
+        cart: state.cart.filter((cart) => cart.id !== action.payload),
       };
     default:
       return state;

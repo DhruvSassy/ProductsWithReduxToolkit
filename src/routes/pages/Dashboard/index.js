@@ -109,7 +109,7 @@ console.log("cart:",cart);
       setOpen(true);
     } else {
       const productToAdd = productRow.find((product) => product.id === id);
-      dispatch(addToCart([...cart, productToAdd]));
+      dispatch(addToCart([productToAdd]));
     }
   };
   

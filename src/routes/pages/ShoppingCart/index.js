@@ -1,83 +1,95 @@
-import React, { useEffect, useState } from 'react';
-import './index.css';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+
+import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
+import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
+import { Alert, Snackbar } from '@mui/material';
+
 import { deleteToCart } from '../../../redux/action';
+import InputBox from '../../../components/InputBox';
 
-function Header() {
-  const navigate = useNavigate();
+import './index.css';
 
-  const onCloseCart = () => {
-    navigate('/');
-  };
-  
+
+function Header({ onCloseCart }) {
   return (
-    <header className="container" style={{ display: 'flex', alignItems: 'center' }}>
+    <header
+      className="container"
+      style={{ display: 'flex', alignItems: 'center' }}
+    >
       <h1 style={{ flex: 1 }}>Shopping Cart</h1>
-     
       <div className="remove">
-        <svg
-          onClick={onCloseCart}
-          version="1.1"
-          className="close"
-          x="0px"
-          y="0px"
-          viewBox="0 0 60 60"
-          enableBackground="new 0 0 60 60"
-        >
+        <svg className="close" onClick={onCloseCart}>
           <polygon points="38.936,23.561 36.814,21.439 30.562,27.691 24.311,21.439 22.189,23.561 28.441,29.812 22.189,36.064 24.311,38.186 30.562,31.934 36.814,38.186 38.936,36.064 32.684,29.812" />
         </svg>
       </div>
     </header>
   );
-  
 }
 
-
-
-function Page() {
+function ShoppingCart() {
   const cartData = useSelector((state) => state.product.cart);
-  console.log("cartData:", cartData);
+  const productData = useSelector((state) => state.product.list);
+  const productQty = productData.map((product) => product.qty);
 
-    // // Use the useEffect hook to update the products state when cartData changes
-    // useEffect(() => {
-    //   setProducts(cartData);
-    // }, [cartData]);
-  const [products, setProducts] = useState(cartData);
-  const navigate = useNavigate();
+  console.log('QTY:', cartData);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-  const onChangeProductQuantity = (index, event) => {
-    const value = event.target.value;
-    const valueInt = parseInt(value);
-    const cloneProducts = [...products];
+  const initialProducts = cartData.map((product) => ({
+    ...product,
+    count: 1, // Or use the default count value
+  }));
 
-    // Minimum quantity is 1, maximum quantity is 100, can be left blank to input easily
-    if (value === '') {
-      cloneProducts[index].qty = value;
-    } else if (valueInt > 0 && valueInt < 100) {
-      cloneProducts[index].qty = valueInt;
-    }
-
-    setProducts(cloneProducts);
-  };
+  const [products, setProducts] = useState(initialProducts);
+  const [open, setOpen] = useState(false);
 
   const onRemoveProduct = (id) => {
+    setProducts((prevProducts) =>
+      prevProducts.filter((product) => product.id !== id)
+    );
     dispatch(deleteToCart(id));
-    setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
   };
-  
+
+
+
+  const onQuantityChange = (index, count) => {
+    if (productQty[index] < count) {
+      setOpen(true);
+    } else if (count >= 0) {
+      products[index].count = parseInt(count);
+      setProducts([...products]);
+    }
+  };
+
   const HandleHome = () => {
     navigate('/');
   };
 
+  const handleClose = (reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setOpen(false);
+  };
+
   return products.length > 0 ? (
     <div>
-      <Header />
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        style={{ marginTop: 1000 }}
+      >
+        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
+          This product is Out of Stock!
+        </Alert>
+      </Snackbar>
+      <Header onCloseCart={HandleHome} />
       <section className="container">
-      <ul className="products">
-        {products.map((product, index) => {
-          return (
+        <ul className="products">
+          {products.map((product, index) => (
             <li className="row" key={index}>
               <div className="col left">
                 <div className="detail">
@@ -87,33 +99,47 @@ function Page() {
               </div>
               <div className="col right">
                 <div className="quantity">
-                  <input
-                    type="text"
-                    className="quantity"
-                    step="1"
-                    value={product.qty}
-                    onChange={(event) => onChangeProductQuantity(index, event)}
-                  />
+                  <div className="quantity-container">
+                    <IndeterminateCheckBoxRoundedIcon
+                      className="indeterminate-icon"
+                      onClick={() => onQuantityChange(index, product.count - 1)}
+                    />
+                    <InputBox
+                      type="text"
+                      className="quantity-input"
+                      // step="1"
+                      value={product.count}
+                      defaultValue={1}
+                      onChange={(event) => {
+                        onQuantityChange(index, event.target.value);
+                      }}
+                      disabled
+                    />
+                    <AddBoxRoundedIcon
+                      className="add-icon"
+                      onClick={() => onQuantityChange(index, product.count + 1)}
+                    />
+                  </div>
                 </div>
+
                 <div className="remove">
                   <svg
-                    onClick={() => onRemoveProduct(product.id)} 
-                     version="1.1"
+                    version="1.1"
                     className="close"
                     x="0px"
                     y="0px"
                     viewBox="0 0 60 60"
                     enableBackground="new 0 0 60 60"
+                    onClick={() => onRemoveProduct(product.id)}
                   >
                     <polygon points="38.936,23.561 36.814,21.439 30.562,27.691 24.311,21.439 22.189,23.561 28.441,29.812 22.189,36.064 24.311,38.186 30.562,31.934 36.814,38.186 38.936,36.064 32.684,29.812" />
                   </svg>
                 </div>
               </div>
             </li>
-          );
-        })}
-      </ul>
-    </section>
+          ))}
+        </ul>
+      </section>
     </div>
   ) : (
     <div className="empty-product">
@@ -130,5 +156,4 @@ function formatCurrency(value) {
   });
 }
 
-
-export default Page;
+export default ShoppingCart;

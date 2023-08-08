@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
-  Button,
   Paper,
   Table,
   TableBody,
@@ -13,9 +12,6 @@ import {
   TableSortLabel,
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
-import IconButton from '@mui/material/IconButton';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 import _ from 'loadsh';
 
@@ -45,7 +41,6 @@ const CustomTable = (props) => {
 
   const sortedRow = sortVisibleRows(row, order, orderByField);
 
-  const [open, setOpen] = useState(false);
 
   return (
     <Box sx={{ width: '100%' }}>

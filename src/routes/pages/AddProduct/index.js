@@ -41,7 +41,8 @@ const AddProduct = () => {
 
   const existingProduct = products.find(
     (product) =>
-      product.productName.toLowerCase() === productName.toLowerCase()
+      product.productName.toLowerCase() === productName.toLowerCase() &&
+      product.id !== id
   );
 
   const validate = () => {

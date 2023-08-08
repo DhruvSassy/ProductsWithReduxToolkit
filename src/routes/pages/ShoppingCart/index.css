@@ -187,7 +187,40 @@
   .quantity > input:hover, .quantity > input:focus {
     border-color: #f58551;
   }
-  
+   
+  .css-1x51dt5-MuiInputBase-input-MuiInput-input.Mui-disabled {
+    opacity: 1;
+    -webkit-text-fill-color: rgba(0, 0, 0, 0.38);
+    text-align: center;
+}
+
+.css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input.Mui-disabled {
+  opacity: 1;
+  -webkit-text-fill-color: rgba(0, 0, 0, 0.38);
+  height: 1px;
+}
+  /* Style the container for icons and input */
+.quantity-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 120px; /* Adjust width as needed */
+  margin: 10px auto;
+}
+
+/* Style the icons */
+.indeterminate-icon {
+  font-size: 24px; /* Adjust size as needed */
+  cursor: pointer;
+  color: #333333;
+}
+
+.add-icon {
+  font-size: 24px; /* Adjust size as needed */
+  cursor: pointer;
+  color: #333333;
+}
+
   .close {
     fill: #7d7d7d;
     transition: color 150ms linear,
