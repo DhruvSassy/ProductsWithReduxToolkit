@@ -1,4 +1,4 @@
-import { ADD_DATA, ADD_TO_CART, DELETE_DATA, DELETE_TO_CART, EDIT_DATA, SET_TABLE_DATA } from './constant';
+import { ADD_DATA, ADD_TO_CART, DELETE_DATA, DELETE_TO_ALL_CART_DATA, DELETE_TO_CART, EDIT_CART_DATA, EDIT_DATA, SET_TABLE_DATA } from './constant';
 
 export const addProduct = (product) => ({
   type: ADD_DATA,
@@ -20,12 +20,23 @@ export const deleteProduct = (id) => ({
   payload: id,
 });
 
-export const addToCart = (product) => ({
+export const addToCart = (cart) => ({
   type:ADD_TO_CART,
-  payload:product,
+  payload:cart,
+});
+
+export const editCart = (id, count) => ({
+  type: EDIT_CART_DATA,
+  payload: { id, count },
 });
 
 export const deleteToCart = (id) => ({
   type:DELETE_TO_CART,
   payload:id,
 });
+
+export const deleteAllCart = () => ({
+  type:DELETE_TO_ALL_CART_DATA,
+  payload:[],
+});
+

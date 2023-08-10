@@ -1,7 +1,7 @@
 import './App.css';
 import RoutesPath from './routes';
 
-function App() {
+const App = () => {
   return (
       <RoutesPath />
   );

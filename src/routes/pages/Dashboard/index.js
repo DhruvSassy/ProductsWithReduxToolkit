@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { Alert, Button, IconButton, Snackbar, Toolbar } from '@mui/material';
+import { IconButton, Toolbar } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
@@ -17,6 +17,7 @@ import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
 import CommonPagination from '../../../components/CommonPagination';
 import { addToCart, deleteProduct } from '../../../redux/action';
+import SnackBar from '../../../components/SnackBar';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -29,7 +30,6 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 
 const Dashboard = () => {
   const headCells = [
-  
     {
       id: 'productName',
       numeric: false,
@@ -42,27 +42,29 @@ const Dashboard = () => {
       numeric: true,
       disablePadding: false,
       label: 'Qty',
+      sort:false,
     },
     {
       id: 'price',
       numeric: true,
       disablePadding: false,
       label: 'Price',
+      sort:false,
     },
     {
       id: 'action',
       numeric: true,
       disablePadding: false,
+      sort:false,
       label: 'Action',
       render: (row) => (
         <>
           <EditIcon onClick={() => handleEdit(row.id)} />
           <DeleteIcon onClick={() => handleDelete(row.id)} />
-          <Button style={{backgroundColor:'black',color:'white'}} onClick={()=>handleAddToCart(row.id)}>Add to Cart</Button>
+          <ButtonBox sx={{backgroundColor:'black',color:'white'}} onClick={()=>handleAddToCart(row.id)} title='Add to Cart' />
         </>
       ),
     },
-   
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
@@ -77,7 +79,7 @@ console.log("cart:",cart);
   const productRow = useSelector(
     (productReducer) => productReducer?.product?.list
   );
-
+  
   const {
     page,
     setPage,
@@ -109,18 +111,11 @@ console.log("cart:",cart);
       setOpen(true);
     } else {
       const productToAdd = productRow.find((product) => product.id === id);
-      dispatch(addToCart([productToAdd]));
+    const productWithInitialCount = { ...productToAdd, count: 1 }; 
+    dispatch(addToCart([productWithInitialCount]));
     }
   };
   
-  const handleClose = ( reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpen(false);
-  };
-  
-
   const handleOnclick = () => {
     localStorage.setItem('page', '0');
     setPage(0);
@@ -175,11 +170,12 @@ console.log("cart:",cart);
       </StyledBadge>
     </IconButton>
       </Toolbar>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}  style={{marginTop:1000}}>
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-          This product already add in cart!
-        </Alert>
-      </Snackbar>
+       <SnackBar
+        open={open}
+        setOpen={setOpen}
+        title=" This product already add in cart!"
+        severity='error'
+      />
       <CustomTable
         headCells={headCells}
         row={visibleRows}

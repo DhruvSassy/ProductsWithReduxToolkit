@@ -4,18 +4,20 @@ import { useNavigate } from 'react-router-dom';
 
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
-import { Alert, Snackbar } from '@mui/material';
 
-import { deleteToCart } from '../../../redux/action';
+import { deleteAllCart, deleteToCart, editCart } from '../../../redux/action';
 import InputBox from '../../../components/InputBox';
+import SnackBar from '../../../components/SnackBar';
+import ButtonBox from '../../../components/ButtonBox';
+import Helper from '../../../Helper';
 
 import './index.css';
 
 
-function Header({ onCloseCart }) {
+const Header = ({ onCloseCart }) => {
   return (
     <header
-      className="container"
+      className='container'
       style={{ display: 'flex', alignItems: 'center' }}
     >
       <h1 style={{ flex: 1 }}>Shopping Cart</h1>
@@ -28,22 +30,34 @@ function Header({ onCloseCart }) {
   );
 }
 
-function ShoppingCart() {
+const ShoppingCart = () => {
   const cartData = useSelector((state) => state.product.cart);
-  const productData = useSelector((state) => state.product.list);
-  const productQty = productData.map((product) => product.qty);
-
-  console.log('QTY:', cartData);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const initialProducts = cartData.map((product) => ({
     ...product,
-    count: 1, // Or use the default count value
+    count: 1,
   }));
 
   const [products, setProducts] = useState(initialProducts);
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+
+  const onQuantityChange = (index, count) => {
+    const productQty = products.map(product => product.qty); 
+    if (productQty[index] < count) {
+      setOpen(true);
+    } else if (count > 0) {
+      products[index].count = parseInt(count);
+      setProducts([...products]);
+      dispatch(editCart(products[index].id, parseInt(count))); 
+    }
+  };
+
+  const HandleHome = () => {
+    navigate('/');
+  };
 
   const onRemoveProduct = (id) => {
     setProducts((prevProducts) =>
@@ -52,40 +66,22 @@ function ShoppingCart() {
     dispatch(deleteToCart(id));
   };
 
-
-
-  const onQuantityChange = (index, count) => {
-    if (productQty[index] < count) {
-      setOpen(true);
-    } else if (count >= 0) {
-      products[index].count = parseInt(count);
-      setProducts([...products]);
-    }
+  const handleDeleteAll = () => {
+    dispatch(deleteAllCart());
+    setProducts([]);
   };
 
-  const HandleHome = () => {
-    navigate('/');
-  };
 
-  const handleClose = (reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpen(false);
-  };
 
   return products.length > 0 ? (
     <div>
-      <Snackbar
+      <SnackBar
         open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        style={{ marginTop: 1000 }}
-      >
-        <Alert onClose={handleClose} severity="error" sx={{ width: '100%' }}>
-          This product is Out of Stock!
-        </Alert>
-      </Snackbar>
+        setOpen={setOpen}
+        title="This product is Out of Stock!"
+        severity='error'
+      />
+     
       <Header onCloseCart={HandleHome} />
       <section className="container">
         <ul className="products">
@@ -94,7 +90,7 @@ function ShoppingCart() {
               <div className="col left">
                 <div className="detail">
                   <div className="name">{product.productName}</div>
-                  <div className="price">{formatCurrency(product.price)}</div>
+                  <div className="price">{Helper(product.price)}</div>
                 </div>
               </div>
               <div className="col right">
@@ -102,26 +98,25 @@ function ShoppingCart() {
                   <div className="quantity-container">
                     <IndeterminateCheckBoxRoundedIcon
                       className="indeterminate-icon"
-                      onClick={() => onQuantityChange(index, product.count - 1)}
+                      onClick={() => onQuantityChange(index, cartData[index].count - 1)}
                     />
                     <InputBox
                       type="text"
                       className="quantity-input"
-                      // step="1"
-                      value={product.count}
-                      defaultValue={1}
+                      // defaultValue={1}
+                      value={cartData[index].count}
                       onChange={(event) => {
-                        onQuantityChange(index, event.target.value);
+                        onQuantityChange(product.id, parseInt(event.target.value));
                       }}
+              
                       disabled
                     />
                     <AddBoxRoundedIcon
                       className="add-icon"
-                      onClick={() => onQuantityChange(index, product.count + 1)}
+                      onClick={() => onQuantityChange(index, cartData[index].count + 1)}
                     />
                   </div>
                 </div>
-
                 <div className="remove">
                   <svg
                     version="1.1"
@@ -140,20 +135,32 @@ function ShoppingCart() {
           ))}
         </ul>
       </section>
+     
+      {products.length > 1 ?
+      <center><ButtonBox sx={{marginTop:"20px"}} onClick={handleDeleteAll} title="Delete All Products" /> </center>: ''}
+
     </div>
+
   ) : (
-    <div className="empty-product">
+    <center>
+      <div className="empty-product">
       <h3>There are no products in your cart.</h3>
-      <button onClick={HandleHome}>Shop now</button>
+      <ButtonBox
+        sx={{
+          backgroundColor: '#16cc9b',
+          border: '2px solid #16cc9b',
+          color: '#ffffff',
+          transition: 'all 0.25s linear',
+          cursor: 'pointer',
+        }}
+        onClick={HandleHome}
+        title="Shop now"
+      />
     </div>
+    </center>
   );
 }
 
-function formatCurrency(value) {
-  return Number(value).toLocaleString('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-  });
-}
+
 
 export default ShoppingCart;

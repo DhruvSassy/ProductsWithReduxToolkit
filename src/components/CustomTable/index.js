@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { visuallyHidden } from '@mui/utils';
 
-import _ from 'loadsh';
+import {orderBy} from 'loadsh';
 
 const CustomTable = (props) => {
   const {
@@ -31,8 +31,8 @@ const CustomTable = (props) => {
     showPagination,
   } = props;
 
-  function sortVisibleRows(list, order, orderBy) {
-    return _.orderBy(list, [orderBy], [order]);
+  const sortVisibleRows = (list, order, orderByField) => {
+    return orderBy(list, [orderByField], [order]);
   }
 
   const createSortHandler = (property) => () => {
