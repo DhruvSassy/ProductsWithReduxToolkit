@@ -8,6 +8,7 @@ import { addProduct, editProduct } from '../../../redux/action';
 
 import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
+import NotiStackComponent from '../../../components/NotiStackComponent';
 
 const AddProduct = () => {
   const { id } = useParams();
@@ -21,10 +22,12 @@ const AddProduct = () => {
   const products = useSelector(
     (productReducer) => productReducer?.product?.list
   );
-
+    console.log("products.productName",products.productName)
   //aapde je product edit karvani hoi e product na data aave
   const productToEdit = products?.find((product) => product?.id === id);
   console.log('productToEdit', productToEdit);
+
+  const notiComponent = NotiStackComponent();
 
   //edit par click karie tyare input box ma data aave
   useEffect(() => {
@@ -95,6 +98,7 @@ const AddProduct = () => {
       };
       dispatch(addProduct(newProduct));
       navigate('/');
+      notiComponent.showSnackbar(`${productName} product added successfully!`, 'success');
     }
   };
 
@@ -110,6 +114,7 @@ const AddProduct = () => {
       };
       dispatch(editProduct(newProduct));
       navigate('/');
+      notiComponent.showSnackbar(`${productName} product edited successfully!`, 'success');
     }
   };
 

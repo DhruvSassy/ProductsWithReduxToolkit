@@ -5,14 +5,14 @@ import { useNavigate } from 'react-router-dom';
 import AddBoxRoundedIcon from '@mui/icons-material/AddBoxRounded';
 import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateCheckBoxRounded';
 
+
 import { deleteAllCart, deleteToCart, editCart } from '../../../redux/action';
 import InputBox from '../../../components/InputBox';
-import SnackBar from '../../../components/SnackBar';
 import ButtonBox from '../../../components/ButtonBox';
 import Helper from '../../../Helper';
+import NotiStackComponent from '../../../components/NotiStackComponent';
 
 import './index.css';
-
 
 const Header = ({ onCloseCart }) => {
   return (
@@ -39,15 +39,15 @@ const ShoppingCart = () => {
   }));
 
   const [products, setProducts] = useState(initialProducts);
-  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const notiComponent = NotiStackComponent();
 
   const onQuantityChange = (index, count) => {
     const productQty = products.map(product => product.qty); 
     if (productQty[index] < count) {
-      setOpen(true);
+      notiComponent.showSnackbar(`${products[index].productName} product is Out of Stock!`, 'error');
     } else if (count > 0) {
       products[index].count = parseInt(count);
       setProducts([...products]);
@@ -64,24 +64,19 @@ const ShoppingCart = () => {
       prevProducts.filter((product) => product.id !== id)
     );
     dispatch(deleteToCart(id));
+    notiComponent.showSnackbar("The product has been removed from the cart Successfully!", 'success');
   };
 
   const handleDeleteAll = () => {
     dispatch(deleteAllCart());
     setProducts([]);
+    notiComponent.showSnackbar("Your cart is Empty Successfully!", 'success');
   };
 
 
 
   return products.length > 0 ? (
     <div>
-      <SnackBar
-        open={open}
-        setOpen={setOpen}
-        title="This product is Out of Stock!"
-        severity='error'
-      />
-     
       <Header onCloseCart={HandleHome} />
       <section className="container">
         <ul className="products">

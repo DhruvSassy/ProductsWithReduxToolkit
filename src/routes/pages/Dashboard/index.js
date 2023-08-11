@@ -17,7 +17,7 @@ import InputBox from '../../../components/InputBox';
 import ButtonBox from '../../../components/ButtonBox';
 import CommonPagination from '../../../components/CommonPagination';
 import { addToCart, deleteProduct } from '../../../redux/action';
-import SnackBar from '../../../components/SnackBar';
+import NotiStackComponent from '../../../components/NotiStackComponent';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -68,7 +68,6 @@ const Dashboard = () => {
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
-  const [open, setOpen] = useState(false);
   const showPagination = true;
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -92,11 +91,15 @@ console.log("cart:",cart);
     handleRequestSort,
   } = CommonPagination();
 
+  const notiComponent = NotiStackComponent();
+
   const handleDelete = (id) => {
+    const index = productRow.findIndex((product) => product.id === id);
     dispatch(deleteProduct(id));
     if (visibleRows?.length === 1 && page > 0) {
       setPage(page - 1);
     }
+    notiComponent.showSnackbar(`${productRow[index]?.productName} product deleted successfully!`, 'success');
   };
 
   const handleEdit = (id) => {
@@ -104,15 +107,16 @@ console.log("cart:",cart);
     localStorage.setItem('page', page);
   };
 
-  const handleAddToCart = (id) => {
-    const isExist = cart.some((rec) => rec.id === id);
-
+  const handleAddToCart = (id,index) => {
+    const isExist = cart.find((rec) => rec.id === id);
+   
     if (isExist) {
-      setOpen(true);
+      notiComponent.showSnackbar(`${isExist?.productName} product already add in cart!`, 'error');
     } else {
       const productToAdd = productRow.find((product) => product.id === id);
     const productWithInitialCount = { ...productToAdd, count: 1 }; 
     dispatch(addToCart([productWithInitialCount]));
+    notiComponent.showSnackbar(`${productToAdd?.productName} product add to cart successfully!`, 'success');
     }
   };
   
@@ -170,12 +174,6 @@ console.log("cart:",cart);
       </StyledBadge>
     </IconButton>
       </Toolbar>
-       <SnackBar
-        open={open}
-        setOpen={setOpen}
-        title=" This product already add in cart!"
-        severity='error'
-      />
       <CustomTable
         headCells={headCells}
         row={visibleRows}

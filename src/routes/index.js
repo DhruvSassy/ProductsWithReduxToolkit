@@ -4,11 +4,13 @@ import Dashboard from './pages/Dashboard';
 import AddProduct from './pages/AddProduct';
 import Error404 from './pages/Error404';
 import ShoppingCart from './pages/ShoppingCart';
+import Login from './pages/Login';
 
 const RoutesPath = () => {
   return (
     <BrowserRouter>
-      <Routes>
+      <Routes>\
+        <Route path='/signIn' element={<Login />} />
         <Route path="/" element={<Dashboard />} />
         <Route path="/add-product" element={<AddProduct />} />
         <Route path="/edit-product/:id" element={<AddProduct />} />
