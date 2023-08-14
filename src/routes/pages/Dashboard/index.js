@@ -9,6 +9,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
+import { GoogleLogout } from '@leecheuk/react-google-login';
+
 
 import { reverse } from 'lodash';
 
@@ -148,14 +150,24 @@ console.log("cart:",cart);
     page * rowsPerPage + rowsPerPage
   );
 
+  const logout = (res) => {
+    localStorage.removeItem('googleIdToken');
+    navigate("/signIn")
+    notiComponent.showSnackbar(`LogOut successfully!`, 'success');
+  };
+
+ const userName=localStorage.getItem('userName')
+
   return (
     <div style={{ margin: '1%' }}>
+ 
       <Toolbar
         sx={{
           pl: { sm: 2 },
           pr: { xs: 1, sm: 1 },
         }}
       >
+      <p sx={{marginRight:'6%'}}>Welcome, {userName}!</p>
         <ButtonBox
           onClick={handleOnclick}
           title="Add Product"
@@ -168,11 +180,17 @@ console.log("cart:",cart);
           value={searchProduct}
           onChange={handleSearchChange}
         />
-    <IconButton aria-label="cart" sx={{marginLeft:'6%'}}>
+    <IconButton aria-label="cart" sx={{marginLeft:'2%',marginRight:'2%'}}>
       <StyledBadge badgeContent={cart?.length} color="secondary">
         <ShoppingCartIcon  onClick={handleOnCart}/>
       </StyledBadge>
     </IconButton>
+    <GoogleLogout
+      clientId="242716011984-oordacustqqj5b3erur8en7b0vdo4q3k.apps.googleusercontent.com"
+      buttonText="Logout"
+      onLogoutSuccess={logout}
+    >
+    </GoogleLogout>
       </Toolbar>
       <CustomTable
         headCells={headCells}
