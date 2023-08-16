@@ -11,7 +11,6 @@ import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
 import { GoogleLogout } from '@leecheuk/react-google-login';
 
-
 import { reverse } from 'lodash';
 
 import CustomTable from '../../../components/CustomTable';
@@ -20,6 +19,7 @@ import ButtonBox from '../../../components/ButtonBox';
 import CommonPagination from '../../../components/CommonPagination';
 import { addToCart, deleteProduct } from '../../../redux/action';
 import NotiStackComponent from '../../../components/NotiStackComponent';
+import GoogleLoginBtn from '../../../components/GoogleLoginBtn';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -31,6 +31,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 const Dashboard = () => {
+  const token = localStorage.getItem('googleIdToken');
+
   const headCells = [
     {
       id: 'productName',
@@ -44,29 +46,48 @@ const Dashboard = () => {
       numeric: true,
       disablePadding: false,
       label: 'Qty',
-      sort:false,
+      sort: false,
     },
     {
       id: 'price',
       numeric: true,
       disablePadding: false,
       label: 'Price',
-      sort:false,
+      sort: false,
     },
-    {
-      id: 'action',
-      numeric: true,
-      disablePadding: false,
-      sort:false,
-      label: 'Action',
-      render: (row) => (
-        <>
-          <EditIcon onClick={() => handleEdit(row.id)} />
-          <DeleteIcon onClick={() => handleDelete(row.id)} />
-          <ButtonBox sx={{backgroundColor:'black',color:'white'}} onClick={()=>handleAddToCart(row.id)} title='Add to Cart' />
-        </>
-      ),
-    },
+    ...(token
+      ? [
+          {
+            id: 'action',
+            numeric: true,
+            disablePadding: false,
+            sort: false,
+            label: 'Action',
+            render: (row) => (
+              <>
+                <EditIcon
+                  onClick={() => handleEdit(row.id)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <DeleteIcon
+                  onClick={() => handleDelete(row.id)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <ButtonBox
+                  sx={{
+                    marginTop: '8px',
+                    backgroundColor: 'black',
+                    color: 'white',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => handleAddToCart(row.id)}
+                  title="Add to Cart"
+                />
+              </>
+            ),
+          },
+        ]
+      : []),
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
@@ -74,13 +95,13 @@ const Dashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-const cart = useSelector((productReducer)=>productReducer?.product?.cart)
-console.log("cart:",cart);
+  const cart = useSelector((productReducer) => productReducer?.product?.cart);
+  console.log('cart:', cart);
 
   const productRow = useSelector(
     (productReducer) => productReducer?.product?.list
   );
-  
+
   const {
     page,
     setPage,
@@ -101,7 +122,10 @@ console.log("cart:",cart);
     if (visibleRows?.length === 1 && page > 0) {
       setPage(page - 1);
     }
-    notiComponent.showSnackbar(`${productRow[index]?.productName} product deleted successfully!`, 'success');
+    notiComponent.showSnackbar(
+      `${productRow[index]?.productName} product deleted successfully!`,
+      'success'
+    );
   };
 
   const handleEdit = (id) => {
@@ -109,19 +133,25 @@ console.log("cart:",cart);
     localStorage.setItem('page', page);
   };
 
-  const handleAddToCart = (id,index) => {
+  const handleAddToCart = (id, index) => {
     const isExist = cart.find((rec) => rec.id === id);
-   
+
     if (isExist) {
-      notiComponent.showSnackbar(`${isExist?.productName} product already add in cart!`, 'error');
+      notiComponent.showSnackbar(
+        `${isExist?.productName} product already add in cart!`,
+        'error'
+      );
     } else {
       const productToAdd = productRow.find((product) => product.id === id);
-    const productWithInitialCount = { ...productToAdd, count: 1 }; 
-    dispatch(addToCart([productWithInitialCount]));
-    notiComponent.showSnackbar(`${productToAdd?.productName} product add to cart successfully!`, 'success');
+      const productWithInitialCount = { ...productToAdd, count: 1 };
+      dispatch(addToCart([productWithInitialCount]));
+      notiComponent.showSnackbar(
+        `${productToAdd?.productName} product add to cart successfully!`,
+        'success'
+      );
     }
   };
-  
+
   const handleOnclick = () => {
     localStorage.setItem('page', '0');
     setPage(0);
@@ -134,7 +164,7 @@ console.log("cart:",cart);
   };
 
   const handleOnCart = () => {
-      navigate('/cartPage');
+    navigate('/cartPage');
   };
 
   //aapde serach kari e "productName" wise te serach kare and aakhi row aave and productData array mathi data aave
@@ -152,45 +182,60 @@ console.log("cart:",cart);
 
   const logout = (res) => {
     localStorage.removeItem('googleIdToken');
-    navigate("/signIn")
+    localStorage.removeItem('userName');
+    navigate('/signIn');
     notiComponent.showSnackbar(`LogOut successfully!`, 'success');
   };
 
- const userName=localStorage.getItem('userName')
+  const userName = localStorage.getItem('userName');
 
   return (
-    <div style={{ margin: '1%' }}>
- 
+    <div style={{ flexGrow: 1 }}>
       <Toolbar
         sx={{
           pl: { sm: 2 },
           pr: { xs: 1, sm: 1 },
+          backgroundColor: 'lightblue',
         }}
       >
-      <p sx={{marginRight:'6%'}}>Welcome, {userName}!</p>
+        {token ? <p>Welcome, {userName}!</p> : null}
         <ButtonBox
           onClick={handleOnclick}
           title="Add Product"
           sx={{ marginTop: '1.5%' }}
         />
-        <SearchIcon sx={{ marginLeft: '60%' }} />
+        <SearchIcon sx={{ marginLeft: '55%', color: 'blue' }} />
         <InputBox
           type="search"
           placeholder="Search Product"
           value={searchProduct}
           onChange={handleSearchChange}
+          sx={{ color: 'white', marginRight: '29px' }}
         />
-    <IconButton aria-label="cart" sx={{marginLeft:'2%',marginRight:'2%'}}>
-      <StyledBadge badgeContent={cart?.length} color="secondary">
-        <ShoppingCartIcon  onClick={handleOnCart}/>
-      </StyledBadge>
-    </IconButton>
-    <GoogleLogout
-      clientId="242716011984-oordacustqqj5b3erur8en7b0vdo4q3k.apps.googleusercontent.com"
-      buttonText="Logout"
-      onLogoutSuccess={logout}
-    >
-    </GoogleLogout>
+        {token ? (
+          <>
+            {' '}
+            <IconButton
+              aria-label="cart"
+              sx={{ marginLeft: '2%', marginRight: '2%' }}
+            >
+              <StyledBadge badgeContent={cart?.length} color="secondary">
+                <ShoppingCartIcon onClick={handleOnCart} />
+              </StyledBadge>
+            </IconButton>
+            <GoogleLogout
+              clientId="242716011984-oordacustqqj5b3erur8en7b0vdo4q3k.apps.googleusercontent.com"
+              buttonText="Logout"
+              onLogoutSuccess={logout}
+            />
+          </>
+        ) : (
+          <GoogleLoginBtn
+            buttonText="Please Login"
+            cookiePolicy={'single_host_origin'}
+            prompt={'select_account'}
+          />
+        )}
       </Toolbar>
       <CustomTable
         headCells={headCells}

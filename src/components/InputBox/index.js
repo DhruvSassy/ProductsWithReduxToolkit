@@ -1,12 +1,26 @@
-import React from 'react'
+import React from 'react';
 
 import { TextField } from '@mui/material';
 
 const InputBox = (props) => {
-    const {name,label,value,type,onChange,error,helperText,placeholder,className,disabled,defaultValue} = props;
+  const {
+    sx,
+    name,
+    label,
+    value,
+    type,
+    onChange,
+    error,
+    helperText,
+    placeholder,
+    className,
+    disabled,
+    defaultValue,
+  } = props;
   return (
-<>
-<TextField
+    <>
+      <TextField
+        sx={sx}
         name={name}
         label={label}
         value={value}
@@ -21,11 +35,10 @@ const InputBox = (props) => {
         disabled={disabled}
         defaultValue={defaultValue}
       />
-      
-<div></div>
-</>
-  )
-}
 
+      <div></div>
+    </>
+  );
+};
 
-export default InputBox
+export default InputBox;
