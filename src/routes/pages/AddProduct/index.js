@@ -22,10 +22,8 @@ const AddProduct = () => {
   const products = useSelector(
     (productReducer) => productReducer?.product?.list
   );
-    console.log("products.productName",products.productName)
   //aapde je product edit karvani hoi e product na data aave
   const productToEdit = products?.find((product) => product?.id === id);
-  console.log('productToEdit', productToEdit);
 
   const notiComponent = NotiStackComponent();
 
@@ -165,11 +163,13 @@ const AddProduct = () => {
             sx={{ marginTop: '1.5%' }}
           />
         )}
+        <div>
         <ButtonBox
           onClick={handleCancel}
           title="Cancel"
           sx={{ marginTop: '1.5%' }}
-        ></ButtonBox>
+        />
+        </div>
       </div>
     </Box>
   );

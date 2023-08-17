@@ -2,11 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import GoogleLogin from '@leecheuk/react-google-login';
+import { gapi } from 'gapi-script';
 
 import NotiStackComponent from '../NotiStackComponent';
 
 const GoogleLoginBtn = (props) => {
-  const { buttonText, prompt } = props;
+  const { buttonText, prompt, style } = props;
 
   const navigate = useNavigate();
   const notiComponent = NotiStackComponent();
@@ -14,7 +15,9 @@ const GoogleLoginBtn = (props) => {
   const clientId =
     '242716011984-oordacustqqj5b3erur8en7b0vdo4q3k.apps.googleusercontent.com';
 
-
+    gapi.load('client:auth2', () => {
+      gapi.auth2.init({ clientId: clientId });
+    });
 
   const onSuccess = (res) => {
     const googleIdToken = res.tokenId;
@@ -29,6 +32,7 @@ const GoogleLoginBtn = (props) => {
 
   const onFailure = (res) => {
     console.log(res);
+    notiComponent.showSnackbar(`${res}!`,'error');
   };
   return (
     <GoogleLogin
@@ -37,6 +41,7 @@ const GoogleLoginBtn = (props) => {
       onSuccess={onSuccess}
       onFailure={onFailure}
       prompt={prompt}
+      style={{style}}
     />
   );
 };

@@ -6,16 +6,24 @@ import {
   DELETE_TO_CART,
   EDIT_CART_DATA,
   EDIT_DATA,
+  LOGIN_SUCCESS,
   SET_TABLE_DATA,
 } from '../action/constant';
 
 const initialState = {
   list: [],
   cart: [],
+  user: [],
 };
 
 const productReducer = (state = initialState, action) => {
   switch (action.type) {
+    case LOGIN_SUCCESS:
+    return {
+      ...state,
+      user:action.payload,
+    };
+
     case ADD_DATA:
       return {
         ...state,

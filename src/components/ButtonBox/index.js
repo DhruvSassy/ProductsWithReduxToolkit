@@ -3,10 +3,10 @@ import React from 'react';
 import { Button } from '@mui/material';
 
 const ButtonBox = (props) => {
-    const {onClick,title,sx,className} = props;
+    const {color,onClick,title,sx,className} = props;
     return (
-        <div>
-            <Button
+              <Button
+                color={color}
                 variant="contained"
                 className={className}
                 onClick={onClick}
@@ -14,7 +14,6 @@ const ButtonBox = (props) => {
             >
                  {title}
             </Button>
-        </div>
     )
 }
 

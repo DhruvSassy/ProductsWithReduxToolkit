@@ -55,8 +55,8 @@ const Dashboard = () => {
       label: 'Price',
       sort: false,
     },
-    ...(token
-      ? [
+   
+   
           {
             id: 'action',
             numeric: true,
@@ -65,29 +65,42 @@ const Dashboard = () => {
             label: 'Action',
             render: (row) => (
               <>
-                <EditIcon
+                <ButtonBox
+                  sx={{
+                    marginBottom: '8px',
+                    marginRight: '5px',
+                    cursor: 'pointer',
+                    fontWeight:'bold'
+                  }}
+                  color="secondary"
                   onClick={() => handleEdit(row.id)}
-                  style={{ cursor: 'pointer' }}
-                />
-                <DeleteIcon
-                  onClick={() => handleDelete(row.id)}
-                  style={{ cursor: 'pointer' }}
+                  title="Edit"
                 />
                 <ButtonBox
                   sx={{
-                    marginTop: '8px',
-                    backgroundColor: 'black',
-                    color: 'white',
+                    marginBottom: '8px',
+                    marginRight: '5px',
                     cursor: 'pointer',
+                    fontWeight:'bold'
                   }}
+                  color="secondary"
+                  onClick={() => handleDelete(row.id)}
+                  title="Delete"
+                />
+                <ButtonBox
+                  sx={{
+                    marginBottom: '8px',
+                    cursor: 'pointer',
+                    fontWeight:'bold'
+                  }}
+                  color="secondary"
                   onClick={() => handleAddToCart(row.id)}
                   title="Add to Cart"
                 />
               </>
             ),
           },
-        ]
-      : []),
+   
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
@@ -96,11 +109,14 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const cart = useSelector((productReducer) => productReducer?.product?.cart);
-  console.log('cart:', cart);
+
+  const user = useSelector((state) => state.product.user);
 
   const productRow = useSelector(
     (productReducer) => productReducer?.product?.list
   );
+
+
 
   const {
     page,
@@ -117,6 +133,7 @@ const Dashboard = () => {
   const notiComponent = NotiStackComponent();
 
   const handleDelete = (id) => {
+    if(token) {
     const index = productRow.findIndex((product) => product.id === id);
     dispatch(deleteProduct(id));
     if (visibleRows?.length === 1 && page > 0) {
@@ -126,14 +143,27 @@ const Dashboard = () => {
       `${productRow[index]?.productName} product deleted successfully!`,
       'success'
     );
+  } else {
+    notiComponent.showSnackbar(
+      `Please Login !`,
+      'error'
+    );
+  }
   };
 
   const handleEdit = (id) => {
+    if(token){
     navigate(`/edit-product/${id}`);
     localStorage.setItem('page', page);
+  } else {
+    notiComponent.showSnackbar(
+      `Please Login !`,
+      'error'
+    );
+  }
   };
 
-  const handleAddToCart = (id, index) => {
+  const handleAddToCart = (id) => {
     const isExist = cart.find((rec) => rec.id === id);
 
     if (isExist) {
@@ -141,7 +171,12 @@ const Dashboard = () => {
         `${isExist?.productName} product already add in cart!`,
         'error'
       );
-    } else {
+    } else if (!token) {
+      notiComponent.showSnackbar(
+        `Please Login !`,
+        'error'
+      );
+    }else {
       const productToAdd = productRow.find((product) => product.id === id);
       const productWithInitialCount = { ...productToAdd, count: 1 };
       dispatch(addToCart([productWithInitialCount]));
@@ -153,9 +188,16 @@ const Dashboard = () => {
   };
 
   const handleOnclick = () => {
+    if(token){
     localStorage.setItem('page', '0');
     setPage(0);
     navigate('/add-product');
+  } else {
+    notiComponent.showSnackbar(
+        `Please Login !`,
+        'error'
+      );
+  }
   };
 
   const handleSearchChange = (event) => {
@@ -171,7 +213,6 @@ const Dashboard = () => {
   const filteredRows = productRow.filter((row) =>
     row.productName.toLowerCase().includes(searchProduct.toLowerCase())
   );
-  console.log('filteredRows', filteredRows);
 
   const reversedRows = reverse(filteredRows);
 
@@ -181,11 +222,15 @@ const Dashboard = () => {
   );
 
   const logout = (res) => {
-    localStorage.removeItem('googleIdToken');
-    localStorage.removeItem('userName');
+    localStorage.removeItem('googleIdToken','token');
+    localStorage.removeItem('userName' && user?.username);
     navigate('/signIn');
     notiComponent.showSnackbar(`LogOut successfully!`, 'success');
   };
+
+  const loginHandler = () => {
+    navigate("/signIn")
+  }
 
   const userName = localStorage.getItem('userName');
 
@@ -198,11 +243,12 @@ const Dashboard = () => {
           backgroundColor: 'lightblue',
         }}
       >
-        {token ? <p>Welcome, {userName}!</p> : null}
+        {token ? <p style={{color:"brown",fontWeight:'bold'}}>Welcome,{ userName || user?.username }!</p> : null}
         <ButtonBox
+          color="secondary"
           onClick={handleOnclick}
-          title="Add Product"
-          sx={{ marginTop: '1.5%' }}
+          title="AddProduct"
+          sx={{ marginLeft: '10px',fontWeight:'bold' }}
         />
         <SearchIcon sx={{ marginLeft: '55%', color: 'blue' }} />
         <InputBox
@@ -210,7 +256,7 @@ const Dashboard = () => {
           placeholder="Search Product"
           value={searchProduct}
           onChange={handleSearchChange}
-          sx={{ color: 'white', marginRight: '29px' }}
+          sx={{ color: 'white', marginRight: '29px',fontWeight:'bold' }}
         />
         {token ? (
           <>
@@ -223,18 +269,20 @@ const Dashboard = () => {
                 <ShoppingCartIcon onClick={handleOnCart} />
               </StyledBadge>
             </IconButton>
-            <GoogleLogout
-              clientId="242716011984-oordacustqqj5b3erur8en7b0vdo4q3k.apps.googleusercontent.com"
-              buttonText="Logout"
-              onLogoutSuccess={logout}
+            <ButtonBox
+              color="warning"
+              onClick={logout}
+              title="LogOut"
+              sx={{ marginLeft: '3px' ,color:"bedge",fontWeight:'bold'}}
             />
           </>
         ) : (
-          <GoogleLoginBtn
-            buttonText="Please Login"
-            cookiePolicy={'single_host_origin'}
-            prompt={'select_account'}
-          />
+          <ButtonBox
+          color="warning"
+          onClick={loginHandler}
+          title="Please Login!"
+          sx={{ marginLeft: '3px',fontWeight:'bold' }}
+        />
         )}
       </Toolbar>
       <CustomTable

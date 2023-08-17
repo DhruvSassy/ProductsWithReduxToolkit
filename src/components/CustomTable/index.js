@@ -43,18 +43,19 @@ const CustomTable = (props) => {
 
 
   return (
-    <Box sx={{ width: '100%',marginTop:'20px' }}>
-      <Paper sx={{ width: '100%', mb: 2 }}>
+    <Box sx={{ width: '100%',marginTop:'20px'}}>
+      <Paper sx={{ width: '100%', mb: 2,backgroundColor:'whitesmoke'}}>
         <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
             <TableHead>
-              <TableRow>
+              <TableRow sx={{margin:1}}>
                 {headCells.map((headCell) => (
                   <TableCell
                     key={headCell.id}
                     align={headCell.numeric ? 'right' : 'left'}
                     padding={headCell.disablePadding ? 'none' : 'normal'}
                     sortDirection={orderByField === headCell.id ? order : false}
+                    style={{backgroundColor:"lavenderblush",fontWeight:"bolder",fontSize:20}}
                   >
                     {headCell.sort === false ? (
                       headCell.label
@@ -92,6 +93,7 @@ const CustomTable = (props) => {
                       <TableCell
                         key={column.id}
                         align={column.numeric ? 'right' : 'left'}
+                        style={{fontSize:17}}
                       >
                         {column.render ? column.render(row) : row[column.id]}
                       </TableCell>
