@@ -1,31 +1,28 @@
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
-import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import GoogleLoginBtn from '../../../components/GoogleLoginBtn';
-
-import './index.css';
-import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../../redux/action';
 import { useNavigate } from 'react-router-dom';
 import NotiStackComponent from '../../../components/NotiStackComponent';
+import GoogleLoginBtn from '../../../components/GoogleLoginBtn';
+import InputBox from '../../../components/InputComponent';
+import ButtonBox from '../../../components/ButtonComponent';
 
 const defaultTheme = createTheme();
 
 
-const Login = ({ onTokenReceived }) => {
+const Login = () => {
   const user = useSelector(state => state.product.user);
 
   const googleIdToken = user?.token;
-
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -35,7 +32,6 @@ const Login = ({ onTokenReceived }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    rememberMe: false,
   });
 
   const [errors, setErrors] = useState({
@@ -44,19 +40,19 @@ const Login = ({ onTokenReceived }) => {
   });
 
   const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    const inputValue = type === 'checkbox' ? checked : value;
-
+    const { name, value } = event.target;
+  
     setFormData((prevData) => ({
       ...prevData,
-      [name]: inputValue,
+      [name]: value,
     }));
-
+  
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: '',
     }));
   };
+  
 
   const validateForm = () => {
     let valid = true;
@@ -88,8 +84,6 @@ const Login = ({ onTokenReceived }) => {
     }
   };
 
-
-
    return (
       <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
@@ -109,7 +103,7 @@ const Login = ({ onTokenReceived }) => {
             Sign in
           </Typography>
           <Box component="form"  noValidate sx={{ mt: 1 }}>
-            <TextField
+            <InputBox
               margin="normal"
               required
               fullWidth
@@ -123,7 +117,7 @@ const Login = ({ onTokenReceived }) => {
               helperText={errors.username}
                 error={errors.username}
             />
-            <TextField
+            <InputBox
               margin="normal"
               required
               fullWidth
@@ -137,16 +131,14 @@ const Login = ({ onTokenReceived }) => {
               error={errors.password} 
               helperText={errors.password}
             />
-            
-            <Button
+            <ButtonBox
               type="submit"
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
               onClick={handleSubmit}
-            >
-              Sign In
-            </Button>
+              title="Sign In"
+            /> 
           </Box>
         </Box>
      

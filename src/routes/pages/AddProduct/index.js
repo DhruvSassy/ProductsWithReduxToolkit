@@ -6,8 +6,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProduct, editProduct } from '../../../redux/action';
 
-import InputBox from '../../../components/InputBox';
-import ButtonBox from '../../../components/ButtonBox';
+import InputBox from '../../../components/InputComponent';
+import ButtonBox from '../../../components/ButtonComponent';
 import NotiStackComponent from '../../../components/NotiStackComponent';
 
 const AddProduct = () => {

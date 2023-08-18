@@ -7,9 +7,9 @@ import IndeterminateCheckBoxRoundedIcon from '@mui/icons-material/IndeterminateC
 
 
 import { deleteAllCart, deleteToCart, editCart } from '../../../redux/action';
-import InputBox from '../../../components/InputBox';
-import ButtonBox from '../../../components/ButtonBox';
-import Helper from '../../../Helper';
+import InputBox from '../../../components/InputComponent';
+import ButtonBox from '../../../components/ButtonComponent';
+import Helper from '../../../Helper/INDCurrency';
 import NotiStackComponent from '../../../components/NotiStackComponent';
 
 import './index.css';

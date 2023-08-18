@@ -7,28 +7,27 @@ import ShoppingCart from './pages/ShoppingCart';
 import Login from './pages/Login';
 
 const RoutesPath = () => {
-  const token = localStorage.getItem("googleIdToken");
+  const token = localStorage.getItem('googleIdToken');
 
-  
   return (
     <BrowserRouter>
       <Routes>
-            <Route path="/signIn" element={<Login />} />
-            {token ? 
-            <>
+        <Route path="/signIn" element={<Login />} />
+        {token ? (
+          <>
             <Route path="/" element={<Dashboard />} />
             <Route path="/add-product" element={<AddProduct />} />
-            <Route path="/edit-product/:id" element={< AddProduct/>} />
-            <Route path="/cartPage" element={<ShoppingCart />} /> 
-            </>
-            : 
-            <>
-             <Route path="/" element={<Dashboard />} />
-            <Route path="/add-product" element={<AddProduct/>}  />
-            <Route path="/edit-product/:id" element={<AddProduct/>}  />
-            </>
-            } 
-            <Route path="*" element={<Error404 />} />
+            <Route path="/edit-product/:id" element={<AddProduct />} />
+            <Route path="/cartPage" element={<ShoppingCart />} />
+          </>
+        ) : (
+          <>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/add-product" element={<AddProduct />} />
+            <Route path="/edit-product/:id" element={<AddProduct />} />
+          </>
+        )}
+        <Route path="*" element={<Error404 />} />
       </Routes>
     </BrowserRouter>
   );

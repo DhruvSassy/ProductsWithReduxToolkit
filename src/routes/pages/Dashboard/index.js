@@ -3,23 +3,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 import { IconButton, Toolbar } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Badge from '@mui/material/Badge';
 import { styled } from '@mui/material/styles';
-import { GoogleLogout } from '@leecheuk/react-google-login';
 
 import { reverse } from 'lodash';
 
 import CustomTable from '../../../components/CustomTable';
-import InputBox from '../../../components/InputBox';
-import ButtonBox from '../../../components/ButtonBox';
+import InputBox from '../../../components/InputComponent';
+import ButtonBox from '../../../components/ButtonComponent';
 import CommonPagination from '../../../components/CommonPagination';
 import { addToCart, deleteProduct } from '../../../redux/action';
 import NotiStackComponent from '../../../components/NotiStackComponent';
-import GoogleLoginBtn from '../../../components/GoogleLoginBtn';
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -55,52 +51,49 @@ const Dashboard = () => {
       label: 'Price',
       sort: false,
     },
-   
-   
-          {
-            id: 'action',
-            numeric: true,
-            disablePadding: false,
-            sort: false,
-            label: 'Action',
-            render: (row) => (
-              <>
-                <ButtonBox
-                  sx={{
-                    marginBottom: '8px',
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    fontWeight:'bold'
-                  }}
-                  color="secondary"
-                  onClick={() => handleEdit(row.id)}
-                  title="Edit"
-                />
-                <ButtonBox
-                  sx={{
-                    marginBottom: '8px',
-                    marginRight: '5px',
-                    cursor: 'pointer',
-                    fontWeight:'bold'
-                  }}
-                  color="secondary"
-                  onClick={() => handleDelete(row.id)}
-                  title="Delete"
-                />
-                <ButtonBox
-                  sx={{
-                    marginBottom: '8px',
-                    cursor: 'pointer',
-                    fontWeight:'bold'
-                  }}
-                  color="secondary"
-                  onClick={() => handleAddToCart(row.id)}
-                  title="Add to Cart"
-                />
-              </>
-            ),
-          },
-   
+    {
+      id: 'action',
+      numeric: true,
+      disablePadding: false,
+      sort: false,
+      label: 'Action',
+      render: (row) => (
+        <>
+          <ButtonBox
+            sx={{
+              marginBottom: '8px',
+              marginRight: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+            color="secondary"
+            onClick={() => handleEdit(row.id)}
+            title="Edit"
+          />
+          <ButtonBox
+            sx={{
+              marginBottom: '8px',
+              marginRight: '5px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+            color="secondary"
+            onClick={() => handleDelete(row.id)}
+            title="Delete"
+          />
+          <ButtonBox
+            sx={{
+              marginBottom: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+            }}
+            color="secondary"
+            onClick={() => handleAddToCart(row.id)}
+            title="Add to Cart"
+          />
+        </>
+      ),
+    },
   ];
 
   const [searchProduct, setSearchProduct] = useState('');
@@ -115,8 +108,6 @@ const Dashboard = () => {
   const productRow = useSelector(
     (productReducer) => productReducer?.product?.list
   );
-
-
 
   const {
     page,
@@ -133,71 +124,63 @@ const Dashboard = () => {
   const notiComponent = NotiStackComponent();
 
   const handleDelete = (id) => {
-    if(token) {
-    const index = productRow.findIndex((product) => product.id === id);
-    dispatch(deleteProduct(id));
-    if (visibleRows?.length === 1 && page > 0) {
-      setPage(page - 1);
+    if (token) {
+      const index = productRow.findIndex((product) => product.id === id);
+      dispatch(deleteProduct(id));
+      if (visibleRows?.length === 1 && page > 0) {
+        setPage(page - 1);
+      }
+      notiComponent.showSnackbar(
+        `${productRow[index]?.productName} product deleted successfully!`,
+        'success'
+      );
+    } else {
+      notiComponent.showSnackbar(`Please Login !`, 'error');
+      // navigate('/signIn');
     }
-    notiComponent.showSnackbar(
-      `${productRow[index]?.productName} product deleted successfully!`,
-      'success'
-    );
-  } else {
-    notiComponent.showSnackbar(
-      `Please Login !`,
-      'error'
-    );
-  }
   };
 
   const handleEdit = (id) => {
-    if(token){
-    navigate(`/edit-product/${id}`);
-    localStorage.setItem('page', page);
-  } else {
-    notiComponent.showSnackbar(
-      `Please Login !`,
-      'error'
-    );
-  }
+    if (token) {
+      navigate(`/edit-product/${id}`);
+      localStorage.setItem('page', page);
+    } else {
+      notiComponent.showSnackbar(`Please Login !`, 'error');
+      // navigate('/signIn');
+    }
   };
 
   const handleAddToCart = (id) => {
     const isExist = cart.find((rec) => rec.id === id);
 
-    if (isExist) {
+    if (isExist && token) {
       notiComponent.showSnackbar(
-        `${isExist?.productName} product already add in cart!`,
+        `${isExist?.productName} product already added to cart!`,
         'error'
       );
-    } else if (!token) {
-      notiComponent.showSnackbar(
-        `Please Login !`,
-        'error'
-      );
-    }else {
+    } else if (token) {
       const productToAdd = productRow.find((product) => product.id === id);
       const productWithInitialCount = { ...productToAdd, count: 1 };
       dispatch(addToCart([productWithInitialCount]));
       notiComponent.showSnackbar(
-        `${productToAdd?.productName} product add to cart successfully!`,
+        `${productToAdd?.productName} product added to cart successfully!`,
         'success'
       );
+    } else {
+      notiComponent.showSnackbar(`Please Login !`, 'error');
+      // navigate('/signIn');
     }
   };
 
   const handleOnclick = () => {
-    if(token){
-    localStorage.setItem('page', '0');
-    setPage(0);
-    navigate('/add-product');
-  } else {
-    notiComponent.showSnackbar(
-        `Please Login !`,
-        'error'
-      );
-  }
+    if (token) {
+      localStorage.setItem('page', '0');
+      setPage(0);
+      navigate('/add-product');
+    } else {
+      notiComponent.showSnackbar(`Please Login !`, 'error');
+      // navigate('/signIn');
+    }
   };
 
   const handleSearchChange = (event) => {
@@ -222,15 +205,15 @@ const Dashboard = () => {
   );
 
   const logout = (res) => {
-    localStorage.removeItem('googleIdToken','token');
-    localStorage.removeItem('userName' && user?.username);
+    localStorage.removeItem('googleIdToken', 'token');
+    localStorage.removeItem('userName');
     navigate('/signIn');
     notiComponent.showSnackbar(`LogOut successfully!`, 'success');
   };
 
   const loginHandler = () => {
-    navigate("/signIn")
-  }
+    navigate('/signIn');
+  };
 
   const userName = localStorage.getItem('userName');
 
@@ -243,12 +226,16 @@ const Dashboard = () => {
           backgroundColor: 'lightblue',
         }}
       >
-        {token ? <p style={{color:"brown",fontWeight:'bold'}}>Welcome,{ userName || user?.username }!</p> : null}
+        {token ? (
+          <p style={{ color: 'brown', fontWeight: 'bold' }}>
+            Welcome,{userName || user?.username}!
+          </p>
+        ) : null}
         <ButtonBox
           color="secondary"
           onClick={handleOnclick}
           title="AddProduct"
-          sx={{ marginLeft: '10px',fontWeight:'bold' }}
+          sx={{ marginLeft: '10px', fontWeight: 'bold' }}
         />
         <SearchIcon sx={{ marginLeft: '55%', color: 'blue' }} />
         <InputBox
@@ -256,7 +243,7 @@ const Dashboard = () => {
           placeholder="Search Product"
           value={searchProduct}
           onChange={handleSearchChange}
-          sx={{ color: 'white', marginRight: '29px',fontWeight:'bold' }}
+          sx={{ color: 'white', marginRight: '29px', fontWeight: 'bold' }}
         />
         {token ? (
           <>
@@ -273,16 +260,16 @@ const Dashboard = () => {
               color="warning"
               onClick={logout}
               title="LogOut"
-              sx={{ marginLeft: '3px' ,color:"bedge",fontWeight:'bold'}}
+              sx={{ marginLeft: '3px', color: 'bedge', fontWeight: 'bold' }}
             />
           </>
         ) : (
           <ButtonBox
-          color="warning"
-          onClick={loginHandler}
-          title="Please Login!"
-          sx={{ marginLeft: '3px',fontWeight:'bold' }}
-        />
+            color="warning"
+            onClick={loginHandler}
+            title="Please Login!"
+            sx={{ marginLeft: '3px', fontWeight: 'bold' }}
+          />
         )}
       </Toolbar>
       <CustomTable
