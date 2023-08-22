@@ -13,7 +13,7 @@ const GoogleLoginBtn = (props) => {
   const notiComponent = NotiStackComponent();
 
   const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID_LOCAL;
-  console.log("clientId",process.env)
+
     gapi.load('client:auth2', () => {
       gapi.auth2.init({ clientId: clientId });
     });
@@ -30,7 +30,6 @@ const GoogleLoginBtn = (props) => {
   };
 
   const onFailure = (res) => {
-    console.log(res);
     notiComponent.showSnackbar(`${res?.error}!`,'error');
   };
   return (
