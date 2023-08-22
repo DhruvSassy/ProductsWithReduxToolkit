@@ -12,13 +12,13 @@ const GoogleLoginBtn = (props) => {
   const navigate = useNavigate();
   const notiComponent = NotiStackComponent();
 
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID_LOCAL;
+  console.log("clientId",process.env)
     gapi.load('client:auth2', () => {
       gapi.auth2.init({ clientId: clientId });
     });
 
-  const onSuccess = (res) => {
+ const onSuccess = (res) => {
     const googleIdToken = res.tokenId;
     localStorage.setItem('userName', res.profileObj.name);
     localStorage.setItem('googleIdToken', googleIdToken);
@@ -40,7 +40,7 @@ const GoogleLoginBtn = (props) => {
       onSuccess={onSuccess}
       onFailure={onFailure}
       prompt={prompt}
-      style={{style}}
+      style={style}
     />
   );
 };
